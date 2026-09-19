@@ -1,8 +1,8 @@
-# FOTO ALBUM Android V0.1
+# PhotoCard Libre Android V0.1
 
-Prima versione Android funzionale minima di FOTO ALBUM. Il frontend è Kotlin + Jetpack Compose; layout MaxRects, didascalie, anteprima e PDF rimangono nel core Python eseguito da Chaquopy.
+PhotoCard Libre è un'app Android per comporre fotografie su pagine A4 e generare PDF pronti per la stampa. Il frontend è Kotlin + Jetpack Compose; layout MaxRects, didascalie, anteprima e PDF rimangono nel core Python eseguito da Chaquopy.
 
-> Stato: build e test host completati. Runtime Android reale **NON TESTATO SU DEVICE**.
+> Stato: versione Android funzionante e già testata su telefono reale.
 
 Il progetto desktop `/home/codex/foto-album` non viene usato a runtime e non deve essere modificato.
 
@@ -13,7 +13,7 @@ Il progetto desktop `/home/codex/foto-album` non viene usato a runtime e non dev
 3. La schermata mostra miniature, selezione, anteprima grande, didascalia, riordino ed eliminazione.
 4. `ANTEPRIMA` chiede al core Python di creare una PNG per ogni pagina A4 in `cache/photo_output`.
 5. `CREA PDF` genera `cache/photo_output/foto-album.pdf` e le anteprime dallo stesso `LayoutResult`.
-6. Su Android 10+ il PDF viene salvato automaticamente tramite MediaStore in `Download/FOTO ALBUM/` con nome `FOTO_ALBUM_YYYY-MM-DD_HHMM.pdf`.
+6. Su Android 10+ il PDF viene salvato automaticamente tramite MediaStore in `Download/PhotoCard Libre/` con nome `PhotoCard_YYYY-MM-DD_HHMM.pdf`.
 7. Su Android 7–9 si apre automaticamente `ACTION_CREATE_DOCUMENT` come fallback. Dopo il salvataggio restano disponibili `APRI PDF` e `CONDIVIDI PDF`.
 
 ## Architettura
@@ -63,7 +63,11 @@ Il test Compose strumentale è compilato nell'APK di test ma richiede un device/
 
 ```bash
 adb install -r app/build/outputs/apk/debug/app-debug.apk
-adb shell am start -n it.fotoalbum.spike/.MainActivity
+adb shell am start -n org.photocardlibre.app/.MainActivity
 ```
 
-Validare manualmente Photo Picker, import di JPEG/PNG reali, miniature, rotazione/configuration change, anteprima multipagina, PDF, salvataggio MediaStore in `Download/FOTO ALBUM`, fallback SAF su API 24–28, apertura/condivisione e stampa del PDF al 100%.
+Validare manualmente Photo Picker, import di JPEG/PNG reali, miniature, rotazione/configuration change, anteprima multipagina, PDF, salvataggio MediaStore in `Download/PhotoCard Libre`, fallback SAF su API 24–28, apertura/condivisione e stampa del PDF al 100%.
+
+## Nota tecnica interna
+
+PhotoCard Libre deriva tecnicamente dalla precedente V0.1 FOTO ALBUM. Le build di sviluppo precedenti usavano l'identificatore storico `it.fotoalbum.spike`; l'identificatore definitivo è `org.photocardlibre.app`.

@@ -14,6 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "FotoAlbumAndroidSpike"
+rootProject.name = "PhotoCardLibreAndroid"
 include(":app")
-

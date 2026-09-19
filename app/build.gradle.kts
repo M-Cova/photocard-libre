@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "it.fotoalbum.spike"
+    namespace = "org.photocardlibre.app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "it.fotoalbum.spike"
+        applicationId = "org.photocardlibre.app"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
