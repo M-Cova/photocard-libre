@@ -5,19 +5,23 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -25,13 +29,19 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -45,16 +55,22 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import org.photocardlibre.app.R
+import androidx.compose.ui.unit.sp
 import org.photocardlibre.app.AlbumViewModel
+import org.photocardlibre.app.R
 import org.photocardlibre.app.export.AutomaticSaveResult
 import org.photocardlibre.app.export.PdfExport
 import org.photocardlibre.app.model.PhotoEntry
@@ -62,6 +78,7 @@ import org.photocardlibre.app.model.CropRect
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 @Composable
 fun AlbumScreen(viewModel: AlbumViewModel) {
@@ -146,6 +163,7 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             Column(
                 modifier = Modifier
@@ -170,41 +188,125 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
                         },
                     )
                 }
-                Row(
+                BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
+                        .padding(horizontal = 12.dp, vertical = 10.dp)
                         .testTag("azioni_principali"),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Button(onClick = addPhotos, modifier = Modifier.weight(1f)) {
-                        Text("AGGIUNGI FOTO")
-                    }
-                    OutlinedButton(onClick = viewModel::preview, modifier = Modifier.weight(1f)) {
-                        Text("ANTEPRIMA")
-                    }
-                    Button(onClick = viewModel::createPdf, modifier = Modifier.weight(1f)) {
-                        Text("CREA PDF")
+                    val compactActions = maxWidth < 390.dp
+                    val actionIconSize = if (compactActions) 18.dp else 20.dp
+                    val actionSpacing = if (compactActions) 4.dp else 6.dp
+                    val actionPadding = PaddingValues(
+                        horizontal = if (compactActions) 4.dp else 8.dp,
+                        vertical = 8.dp,
+                    )
+                    val actionTextStyle = MaterialTheme.typography.labelLarge.copy(
+                        fontSize = if (compactActions) 12.sp else 14.sp,
+                        lineHeight = if (compactActions) 14.sp else 18.sp,
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        FilledTonalButton(
+                            onClick = addPhotos,
+                            modifier = Modifier.weight(1f).heightIn(min = 56.dp),
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            ),
+                            contentPadding = actionPadding,
+                        ) {
+                            Icon(
+                                painterResource(R.drawable.ic_add_photo),
+                                contentDescription = null,
+                                modifier = Modifier.size(actionIconSize),
+                            )
+                            Spacer(Modifier.width(actionSpacing))
+                            Text(
+                                "AGGIUNGI FOTO",
+                                style = actionTextStyle,
+                                textAlign = TextAlign.Center,
+                                maxLines = 2,
+                            )
+                        }
+                        OutlinedButton(
+                            onClick = viewModel::preview,
+                            modifier = Modifier.weight(1f).heightIn(min = 56.dp),
+                            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
+                            contentPadding = actionPadding,
+                        ) {
+                            Icon(
+                                painterResource(R.drawable.ic_visibility),
+                                contentDescription = null,
+                                modifier = Modifier.size(actionIconSize),
+                            )
+                            Spacer(Modifier.width(actionSpacing))
+                            Text(
+                                "ANTEPRIMA",
+                                style = actionTextStyle,
+                                textAlign = TextAlign.Center,
+                                maxLines = 2,
+                            )
+                        }
+                        Button(
+                            onClick = viewModel::createPdf,
+                            modifier = Modifier.weight(1f).heightIn(min = 56.dp),
+                            contentPadding = actionPadding,
+                        ) {
+                            Icon(
+                                painterResource(R.drawable.ic_picture_as_pdf),
+                                contentDescription = null,
+                                modifier = Modifier.size(actionIconSize),
+                            )
+                            Spacer(Modifier.width(actionSpacing))
+                            Text(
+                                "CREA PDF",
+                                style = actionTextStyle,
+                                textAlign = TextAlign.Center,
+                                maxLines = 2,
+                            )
+                        }
                     }
                 }
             }
         },
     ) { padding ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(top = 18.dp, bottom = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item {
                 Text(
-                    stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.onPrimaryContainer)) {
+                            append("PhotoCard")
+                        }
+                        append(" ")
+                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
+                            append("Libre")
+                        }
+                    },
+                    style = MaterialTheme.typography.headlineLarge,
                 )
-                Text("${state.album.photos.size} fotografie")
+                Text(
+                    if (state.album.photos.size == 1) "1 fotografia"
+                    else "${state.album.photos.size} fotografie",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             if (state.album.photos.isEmpty()) {
                 item {
-                    Card(modifier = Modifier.fillMaxWidth()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                    ) {
                         Text("Premi AGGIUNGI FOTO per iniziare.", modifier = Modifier.padding(24.dp))
                     }
                 }
@@ -212,9 +314,9 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
                 item {
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(110.dp),
-                        modifier = Modifier.fillMaxWidth().height(260.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth().height(276.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         items(state.album.photos, key = { it.id }) { photo ->
                             PhotoThumbnail(
@@ -249,7 +351,13 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
             }
             state.pdfPath?.let {
                 item {
-                    Card(modifier = Modifier.fillMaxWidth()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                    ) {
                         Column(
                             Modifier.padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -361,30 +469,51 @@ internal fun SavedPdfActions(onOpen: () -> Unit, onShare: () -> Unit) {
 
 @Composable
 private fun PhotoThumbnail(photo: PhotoEntry, selected: Boolean, onClick: () -> Unit) {
-    Column(
+    Card(
+        onClick = onClick,
         modifier = Modifier
-            .width(110.dp)
-            .then(
-                if (selected) Modifier.border(
-                    3.dp,
-                    MaterialTheme.colorScheme.primary,
-                    RoundedCornerShape(8.dp),
-                ) else Modifier
-            )
-            .clickable(onClick = onClick)
-            .padding(6.dp),
+            .fillMaxWidth()
+            .semantics { this.selected = selected },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = if (selected) {
+            BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
+        } else {
+            BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant)
+        },
     ) {
-        LocalImage(
-            photo.localPath,
-            Modifier.fillMaxWidth().height(82.dp),
-            "Miniatura ${photo.displayName}",
-            photo.crop,
-        )
-        Text(
-            photo.caption.ifEmpty { "SENZA DIDASCALIA" },
-            maxLines = 2,
-            style = MaterialTheme.typography.labelSmall,
-        )
+        Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Box {
+                LocalImage(
+                    photo.localPath,
+                    Modifier.fillMaxWidth().aspectRatio(4f / 3f),
+                    "Miniatura ${photo.displayName}",
+                    photo.crop,
+                )
+                if (selected) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_check_circle),
+                        contentDescription = "Fotografia selezionata",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(4.dp)
+                            .background(MaterialTheme.colorScheme.surface, CircleShape),
+                    )
+                }
+            }
+            Text(
+                photo.caption.uppercase(Locale.ROOT),
+                maxLines = 2,
+                minLines = 2,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = if (selected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
 }
 
@@ -397,16 +526,34 @@ internal fun SelectedPhotoEditor(
     onDelete: () -> Unit,
     onEdit: () -> Unit,
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("FOTOGRAFIA SELEZIONATA", fontWeight = FontWeight.Bold)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(
+                "FOTOGRAFIA SELEZIONATA",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
             LocalImage(
                 photo.localPath,
-                Modifier.fillMaxWidth().height(220.dp),
+                Modifier.fillMaxWidth().aspectRatio(4f / 3f),
                 "Fotografia selezionata",
                 photo.crop,
             )
-            Button(onClick = onEdit, modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = onEdit,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_edit),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondaryContainer,
+                )
+                Spacer(Modifier.width(8.dp))
                 Text("MODIFICA FOTO")
             }
             OutlinedTextField(
@@ -414,16 +561,33 @@ internal fun SelectedPhotoEditor(
                 onValueChange = onCaptionChange,
                 label = { Text("DIDASCALIA (massimo 4 parole)") },
                 singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedLabelColor = MaterialTheme.colorScheme.secondary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.secondary,
+                ),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                ),
                 modifier = Modifier.fillMaxWidth(),
             )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = onMoveBefore, modifier = Modifier.weight(1f)) {
+                OutlinedButton(
+                    onClick = onMoveBefore,
+                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                ) {
                     Text("PRIMA")
                 }
-                OutlinedButton(onClick = onMoveAfter, modifier = Modifier.weight(1f)) {
+                OutlinedButton(
+                    onClick = onMoveAfter,
+                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                ) {
                     Text("DOPO")
                 }
-                TextButton(onClick = onDelete, modifier = Modifier.weight(1f)) {
+                TextButton(
+                    onClick = onDelete,
+                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                ) {
                     Text("ELIMINA")
                 }
             }
@@ -446,7 +610,10 @@ private fun LocalImage(
     if (bitmap != null) {
         Image(bitmap, description, modifier, contentScale = ContentScale.Fit)
     } else {
-        Box(modifier.background(Color.LightGray), contentAlignment = Alignment.Center) {
+        Box(
+            modifier.background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center,
+        ) {
             Text("Immagine non disponibile")
         }
     }
@@ -456,8 +623,14 @@ private fun LocalImage(
 private fun PreviewDialog(paths: List<String>, onClose: () -> Unit) {
     AlertDialog(
         onDismissRequest = onClose,
-        confirmButton = { TextButton(onClick = onClose) { Text("CHIUDI") } },
-        title = { Text("ANTEPRIMA A4") },
+        confirmButton = { Button(onClick = onClose) { Text("CHIUDI") } },
+        title = {
+            Text(
+                "ANTEPRIMA A4",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+        },
         text = {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(paths.size) { index ->

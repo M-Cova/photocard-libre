@@ -29,12 +29,14 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,15 +46,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import org.photocardlibre.app.R
 import org.photocardlibre.app.model.CropPreset
 import org.photocardlibre.app.model.CropRect
 import org.photocardlibre.app.model.PhotoEntry
@@ -86,15 +89,24 @@ internal fun CropEditorScreen(
             .imePadding()
             .testTag("editor_crop"),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("MODIFICA FOTO") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.primary,
+                ),
                 navigationIcon = {
                     IconButton(
                         onClick = onBack,
                         modifier = Modifier.testTag("indietro_crop"),
                     ) {
-                        Text("←", style = MaterialTheme.typography.headlineSmall)
+                        Icon(
+                            painterResource(R.drawable.ic_arrow_back),
+                            contentDescription = "Indietro",
+                        )
                     }
                 },
             )
@@ -195,9 +207,11 @@ private fun CropFrame(
     val visibleCrop = crop ?: FULL_IMAGE
     val image = remember(bitmap) { bitmap.asImageBitmap() }
     val currentCrop by rememberUpdatedState(visibleCrop)
+    val frameBackground = MaterialTheme.colorScheme.inverseSurface
+    val frameGuide = MaterialTheme.colorScheme.inverseOnSurface
     Canvas(
         modifier = modifier
-            .background(Color.Black)
+            .background(frameBackground)
             .then(
                 if (gesturesEnabled && maximumCrop != null) {
                     Modifier.pointerInput(bitmap, maximumCrop) {
@@ -219,7 +233,7 @@ private fun CropFrame(
                     Modifier
                 },
             )
-            .border(2.dp, Color.White),
+            .border(2.dp, frameGuide),
     ) {
         val left = (visibleCrop.left * bitmap.width).roundToInt().coerceIn(0, bitmap.width - 1)
         val top = (visibleCrop.top * bitmap.height).roundToInt().coerceIn(0, bitmap.height - 1)
@@ -235,7 +249,7 @@ private fun CropFrame(
             dstSize = IntSize(size.width.roundToInt(), size.height.roundToInt()),
             filterQuality = FilterQuality.High,
         )
-        drawRect(Color.White, style = Stroke(width = 2.dp.toPx()))
+        drawRect(frameGuide, style = Stroke(width = 2.dp.toPx()))
     }
 }
 
