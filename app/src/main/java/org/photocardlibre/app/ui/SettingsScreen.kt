@@ -40,16 +40,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.photocardlibre.app.R
+import org.photocardlibre.app.settings.PdfImageSize
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SettingsScreen(
+    selectedImageSize: PdfImageSize,
+    onImageSizeSelected: (PdfImageSize) -> Unit,
     onBack: () -> Unit,
     onOpenInfo: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var selectedLanguage by rememberSaveable { mutableIntStateOf(R.string.language_system) }
-    var selectedImageSize by rememberSaveable { mutableIntStateOf(R.string.pdf_size_5_cm) }
     var selectedCaptionSize by rememberSaveable { mutableIntStateOf(R.string.caption_size_medium) }
     var cuttingBorderEnabled by rememberSaveable { mutableStateOf(true) }
 
@@ -97,14 +99,18 @@ internal fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             )
-            listOf(R.string.pdf_size_5_cm, R.string.pdf_size_7_cm, R.string.pdf_size_10_cm)
-                .forEach { option ->
-                    RadioSettingsOption(
-                        label = option,
-                        selected = selectedImageSize == option,
-                        onSelect = { selectedImageSize = option },
-                    )
-                }
+            listOf(
+                PdfImageSize.CM_5 to R.string.pdf_size_5_cm,
+                PdfImageSize.CM_7 to R.string.pdf_size_7_cm,
+                PdfImageSize.CM_10 to R.string.pdf_size_10_cm,
+            ).forEach { (size, label) ->
+                RadioSettingsOption(
+                    label = label,
+                    selected = selectedImageSize == size,
+                    onSelect = { onImageSizeSelected(size) },
+                    radioTestTag = "pdf_size_${size.centimeters}",
+                )
+            }
 
             SettingsDivider()
             SettingsSectionTitle(R.string.pdf_caption_size_section)
@@ -198,6 +204,7 @@ private fun RadioSettingsOption(
     @StringRes label: Int,
     selected: Boolean,
     onSelect: () -> Unit,
+    radioTestTag: String? = null,
 ) {
     Row(
         modifier = Modifier
@@ -208,7 +215,11 @@ private fun RadioSettingsOption(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        RadioButton(selected = selected, onClick = null)
+        RadioButton(
+            selected = selected,
+            onClick = null,
+            modifier = if (radioTestTag == null) Modifier else Modifier.testTag(radioTestTag),
+        )
         Text(stringResource(label), style = MaterialTheme.typography.bodyLarge)
     }
 }

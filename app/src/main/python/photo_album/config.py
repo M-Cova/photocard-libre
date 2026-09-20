@@ -12,7 +12,8 @@ def cm_to_points(value: float) -> float:
 
 PAGE_WIDTH_PT, PAGE_HEIGHT_PT = A4
 PAGE_MARGIN_PT = cm_to_points(1.0)
-MAX_PHOTO_SIDE_PT = cm_to_points(5.0)
+DEFAULT_MAX_PHOTO_SIDE_CM = 5
+SUPPORTED_MAX_PHOTO_SIDE_CM = (5, 7, 10)
 
 TILE_SIDE_PADDING_PT = cm_to_points(0.22)
 TILE_TOP_PADDING_PT = cm_to_points(0.22)

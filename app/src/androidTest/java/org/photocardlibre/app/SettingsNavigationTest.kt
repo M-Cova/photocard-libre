@@ -1,6 +1,7 @@
 package org.photocardlibre.app
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -9,6 +10,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import org.junit.Rule
 import org.junit.Test
+import org.photocardlibre.app.settings.PdfImageSize
+import org.photocardlibre.app.settings.SettingsRepository
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 class SettingsNavigationTest {
     @get:Rule
@@ -61,6 +66,21 @@ class SettingsNavigationTest {
         ).forEach { label ->
             composeRule.onNodeWithText(label).performScrollTo().assertIsDisplayed()
         }
+    }
+
+    @Test
+    fun selectedPdfImageSizeRemainsSelectedAfterActivityRecreation() {
+        openSettings()
+        composeRule.onNodeWithText("7 cm").performScrollTo().performClick()
+        composeRule.waitUntil {
+            runBlocking {
+                SettingsRepository(composeRule.activity).pdfImageSize.first() == PdfImageSize.CM_7
+            }
+        }
+
+        composeRule.activityRule.scenario.recreate()
+        openSettings()
+        composeRule.onNodeWithTag("pdf_size_7").assertIsSelected()
     }
 
     private fun openSettings() {

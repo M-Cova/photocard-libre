@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.chaquo.python.Python
 import org.photocardlibre.app.model.PhotoEntry
+import org.photocardlibre.app.settings.PdfImageSize
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -13,7 +14,11 @@ data class RenderResult(val pdfPath: String?, val previewPaths: List<String>, va
 class PythonAlbumBridge(context: Context) {
     private val outputDirectory = File(context.cacheDir, "photo_output")
 
-    fun render(photos: List<PhotoEntry>, includePdf: Boolean): Result<RenderResult> = runCatching {
+    fun render(
+        photos: List<PhotoEntry>,
+        includePdf: Boolean,
+        pdfImageSize: PdfImageSize,
+    ): Result<RenderResult> = runCatching {
         outputDirectory.mkdirs()
         val payload = JSONArray().apply {
             photos.forEach { photo ->
@@ -33,7 +38,13 @@ class PythonAlbumBridge(context: Context) {
         }
         val rawResult = Python.getInstance()
             .getModule("android_bridge")
-            .callAttr("render_album", payload.toString(), outputDirectory.absolutePath, includePdf)
+            .callAttr(
+                "render_album",
+                payload.toString(),
+                outputDirectory.absolutePath,
+                includePdf,
+                pdfImageSize.centimeters,
+            )
             .toString()
         val json = JSONObject(rawResult)
         if (!json.getBoolean("success")) {

@@ -4,13 +4,19 @@ import json
 from pathlib import Path
 import traceback
 
+from photo_album import config
 from photo_album.images import ImageLoadError, load_photo
 from photo_album.layout import create_layout
 from photo_album.models import CaptionError, NormalizedCrop
 from photo_album.rendering import create_pdf, render_preview_page
 
 
-def render_album(items_json: str, output_directory: str, include_pdf: bool) -> str:
+def render_album(
+    items_json: str,
+    output_directory: str,
+    include_pdf: bool,
+    max_photo_side_cm: int = config.DEFAULT_MAX_PHOTO_SIDE_CM,
+) -> str:
     try:
         raw_items = json.loads(items_json)
         if not raw_items:
@@ -23,7 +29,7 @@ def render_album(items_json: str, output_directory: str, include_pdf: bool) -> s
             item.set_caption(raw_item.get("caption", ""))
             items.append(item)
 
-        layout = create_layout(items)
+        layout = create_layout(items, int(max_photo_side_cm))
         output = Path(output_directory)
         output.mkdir(parents=True, exist_ok=True)
         for old_preview in output.glob("anteprima-*.png"):

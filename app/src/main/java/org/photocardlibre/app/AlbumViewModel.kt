@@ -13,6 +13,8 @@ import org.photocardlibre.app.model.CropRect
 import org.photocardlibre.app.python.AlbumRenderException
 import org.photocardlibre.app.python.PythonAlbumBridge
 import org.photocardlibre.app.storage.PhotoCacheAdapter
+import org.photocardlibre.app.settings.PdfImageSize
+import org.photocardlibre.app.settings.SettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -28,6 +30,7 @@ data class AlbumUiState(
     val pdfGenerationId: Long = 0,
     val savedPdfUri: String? = null,
     val pdfSaving: Boolean = false,
+    val pdfImageSize: PdfImageSize = PdfImageSize.DEFAULT,
 ) {
     val hasSavedPdfActions: Boolean
         get() = !pdfSaving && !pdfPath.isNullOrBlank() && !savedPdfUri.isNullOrBlank()
@@ -36,11 +39,30 @@ data class AlbumUiState(
 class AlbumViewModel(application: Application) : AndroidViewModel(application) {
     private val cache = PhotoCacheAdapter(application)
     private val python = PythonAlbumBridge(application)
+    private val settings = SettingsRepository(application)
 
     var state by mutableStateOf(AlbumUiState())
         private set
 
-    init { cache.startFreshSession() }
+    init {
+        cache.startFreshSession()
+        viewModelScope.launch {
+            settings.pdfImageSize.collect { savedSize ->
+                state = state.copy(pdfImageSize = savedSize)
+            }
+        }
+    }
+
+    fun selectPdfImageSize(size: PdfImageSize) {
+        if (size == state.pdfImageSize) return
+        state = state.copy(
+            pdfImageSize = size,
+            previewPaths = emptyList(),
+            pdfPath = null,
+            savedPdfUri = null,
+        )
+        viewModelScope.launch { settings.setPdfImageSize(size) }
+    }
 
     fun importUris(uris: List<Uri>) {
         if (uris.isEmpty()) return
@@ -103,8 +125,11 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
             userMessage = null,
         )
         val photos = state.album.photos
+        val pdfImageSize = state.pdfImageSize
         viewModelScope.launch {
-            val result = withContext(Dispatchers.IO) { python.render(photos, includePdf) }
+            val result = withContext(Dispatchers.IO) {
+                python.render(photos, includePdf, pdfImageSize)
+            }
             result.fold(
                 onSuccess = { rendered ->
                     state = state.copy(

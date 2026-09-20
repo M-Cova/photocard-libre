@@ -111,6 +111,31 @@ class PdfImageOptimizationTests(unittest.TestCase):
             self.assertEqual([(expected.photo_width, expected.photo_height)], draw_calls)
             self.assertAlmostEqual(config.cm_to_points(5), max(draw_calls[0]))
 
+    def test_pdf_draw_size_uses_each_selected_physical_limit(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "photo.png"
+            self._save_rgb(source, (4000, 2000))
+            item = PhotoItem(source, 4000, 2000)
+
+            for max_side_cm in config.SUPPORTED_MAX_PHOTO_SIDE_CM:
+                draw_calls = []
+                layout = create_layout([item], max_side_cm)
+
+                class RecordingCanvas:
+                    def __init__(self, *args, **kwargs):
+                        pass
+
+                    def drawImage(self, image, x, y, width, height, **kwargs):
+                        draw_calls.append((width, height))
+
+                    def __getattr__(self, name):
+                        return lambda *args, **kwargs: None
+
+                with patch("photo_album.rendering.Canvas", RecordingCanvas):
+                    create_pdf(layout, Path(directory) / f"album-{max_side_cm}.pdf")
+
+                self.assertAlmostEqual(config.cm_to_points(max_side_cm), max(draw_calls[0]))
+
     def test_high_resolution_pdf_is_smaller_than_legacy_embedding(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -26,15 +26,28 @@ class Rect:
         return self.y + self.height
 
 
-def photo_size(pixel_width: int, pixel_height: int) -> tuple[float, float]:
+def photo_size(
+    pixel_width: int,
+    pixel_height: int,
+    max_photo_side_cm: int = config.DEFAULT_MAX_PHOTO_SIDE_CM,
+) -> tuple[float, float]:
     if pixel_width <= 0 or pixel_height <= 0:
         raise ValueError("Le dimensioni della fotografia devono essere positive.")
-    scale = config.MAX_PHOTO_SIDE_PT / max(pixel_width, pixel_height)
+    if max_photo_side_cm not in config.SUPPORTED_MAX_PHOTO_SIDE_CM:
+        raise ValueError("Dimensione immagini PDF non supportata.")
+    scale = config.cm_to_points(max_photo_side_cm) / max(pixel_width, pixel_height)
     return pixel_width * scale, pixel_height * scale
 
 
-def tile_geometry(item: PhotoItem) -> TileGeometry:
-    photo_width, photo_height = photo_size(item.pixel_width, item.pixel_height)
+def tile_geometry(
+    item: PhotoItem,
+    max_photo_side_cm: int = config.DEFAULT_MAX_PHOTO_SIDE_CM,
+) -> TileGeometry:
+    photo_width, photo_height = photo_size(
+        item.pixel_width,
+        item.pixel_height,
+        max_photo_side_cm,
+    )
     return TileGeometry(
         photo_width=photo_width,
         photo_height=photo_height,
@@ -133,13 +146,16 @@ class _PagePacker:
         return chosen.x, chosen.y
 
 
-def create_layout(items: list[PhotoItem]) -> LayoutResult:
+def create_layout(
+    items: list[PhotoItem],
+    max_photo_side_cm: int = config.DEFAULT_MAX_PHOTO_SIDE_CM,
+) -> LayoutResult:
     if not items:
         return LayoutResult(pages=[])
     pages: list[LayoutPage] = [LayoutPage(index=0)]
     packers = [_PagePacker()]
     for item in items:
-        geometry = tile_geometry(item)
+        geometry = tile_geometry(item, max_photo_side_cm)
         page_index = len(pages) - 1
         position = packers[-1].place(geometry)
         if position is None:
@@ -155,4 +171,3 @@ def create_layout(items: list[PhotoItem]) -> LayoutResult:
             Placement(item=item, page_index=page_index, x=x, y=y, geometry=geometry)
         )
     return LayoutResult(pages=pages)
-

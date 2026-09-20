@@ -104,6 +104,8 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
             onOpenSettings = { destination = AppDestination.SETTINGS },
         )
         AppDestination.SETTINGS -> SettingsScreen(
+            selectedImageSize = viewModel.state.pdfImageSize,
+            onImageSizeSelected = viewModel::selectPdfImageSize,
             onBack = { destination = AppDestination.HOME },
             onOpenInfo = { destination = AppDestination.INFO },
         )
