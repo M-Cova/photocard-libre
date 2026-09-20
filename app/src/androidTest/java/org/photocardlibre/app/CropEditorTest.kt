@@ -73,7 +73,7 @@ class CropEditorTest {
     fun editorShowsOnlyRequiredPresetsAndConfirm() {
         setEditor()
 
-        listOf("ORIGINALE", "1:1", "4:3", "16:9").forEach { label ->
+        listOf("ORIGINALE", "1:1", "4:3", "3:4").forEach { label ->
             composeRule.onNodeWithText(label).fetchSemanticsNode()
         }
         composeRule.onNodeWithText("CONFERMA").assertIsDisplayed().assertHasClickAction()
@@ -196,7 +196,7 @@ class CropEditorTest {
             }
         }
 
-        composeRule.onNodeWithText("16:9").performClick()
+        composeRule.onNodeWithText("3:4").performClick()
         composeRule.onNodeWithTag("indietro_crop").performClick()
         composeRule.runOnIdle { assertEquals(previous, savedCrop) }
         composeRule.onNodeWithText("SCHERMATA PRINCIPALE").assertIsDisplayed()

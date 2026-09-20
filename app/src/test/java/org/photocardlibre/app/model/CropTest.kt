@@ -20,10 +20,10 @@ class CropTest {
         val expected = mapOf(
             CropPreset.SQUARE to 1.0,
             CropPreset.FOUR_THREE to 4.0 / 3.0,
-            CropPreset.SIXTEEN_NINE to 16.0 / 9.0,
+            CropPreset.THREE_FOUR to 3.0 / 4.0,
         )
         assertEquals(
-            listOf("ORIGINALE", "1:1", "4:3", "16:9"),
+            listOf("ORIGINALE", "1:1", "4:3", "3:4"),
             CropPreset.entries.map { it.label },
         )
         expected.forEach { (preset, ratio) ->

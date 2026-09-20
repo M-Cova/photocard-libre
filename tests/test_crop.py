@@ -26,9 +26,9 @@ class CropCoreTests(unittest.TestCase):
             "1:1": NormalizedCrop(0.125, 0.0, 0.75, 1.0),
             "4:3": NormalizedCrop(0.0, 0.0, 1.0, 1.0),
             "3:2": NormalizedCrop(0.0, 1.0 / 18.0, 1.0, 8.0 / 9.0),
-            "16:9": NormalizedCrop(0.0, 0.125, 1.0, 0.75),
+            "3:4": NormalizedCrop(0.21875, 0.0, 0.5625, 1.0),
         }
-        expected = {"1:1": 1.0, "4:3": 4 / 3, "3:2": 3 / 2, "16:9": 16 / 9}
+        expected = {"1:1": 1.0, "4:3": 4 / 3, "3:2": 3 / 2, "3:4": 3 / 4}
         for label, crop in crops.items():
             with self.subTest(label=label):
                 result = crop_image(image, crop)

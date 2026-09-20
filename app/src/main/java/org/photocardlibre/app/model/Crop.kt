@@ -25,7 +25,7 @@ enum class CropPreset(val label: String, val aspectRatio: Double?) {
     ORIGINAL("ORIGINALE", null),
     SQUARE("1:1", 1.0),
     FOUR_THREE("4:3", 4.0 / 3.0),
-    SIXTEEN_NINE("16:9", 16.0 / 9.0),
+    THREE_FOUR("3:4", 3.0 / 4.0),
     ;
 
     fun defaultRect(imageWidth: Int, imageHeight: Int): CropRect? {
