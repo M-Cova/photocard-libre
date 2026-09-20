@@ -1,4 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PhotoCard Libre</string>
+    <string name="home_title">HOME</string>
+    <string name="open_settings">Apri impostazioni</string>
+    <string name="navigate_back">Indietro</string>
+
+    <string name="settings_title">IMPOSTAZIONI</string>
+    <string name="language_section">LINGUA</string>
+    <string name="language_system">Sistema</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_english">English</string>
+    <string name="pdf_image_size_section">DIMENSIONE IMMAGINI PDF</string>
+    <string name="pdf_image_size_support">Dimensione massima calcolata sul lato più lungo</string>
+    <string name="pdf_size_5_cm">5 cm</string>
+    <string name="pdf_size_7_cm">7 cm</string>
+    <string name="pdf_size_10_cm">10 cm</string>
+    <string name="pdf_caption_size_section">DIMENSIONE DIDASCALIA PDF</string>
+    <string name="caption_size_small">Piccola</string>
+    <string name="caption_size_medium">Media</string>
+    <string name="caption_size_large">Grande</string>
+    <string name="cutting_border_section">BORDO DI TAGLIO</string>
+    <string name="cutting_border_enabled">Mostra il bordo di taglio</string>
+    <string name="app_info_section">INFO SULL\'APP</string>
+    <string name="app_info_entry">Info sull\'app</string>
+
+    <string name="app_info_title">INFO SULL\'APP</string>
+    <string name="app_description">App libera per creare schede fotografiche stampabili con didascalie.</string>
+    <string name="version_label">Versione</string>
+    <string name="software_license_label">Licenza software</string>
+    <string name="graphic_resources_license_label">Licenza risorse grafiche</string>
+    <string name="source_repository_label">Repository sorgente</string>
+    <string name="report_issue_label">Segnala un problema</string>
+    <string name="privacy_label">Privacy</string>
+    <string name="privacy_description">Le fotografie vengono elaborate localmente sul dispositivo.</string>
+    <string name="credits_label">Crediti</string>
+    <string name="value_to_be_defined">Da definire</string>
 </resources>

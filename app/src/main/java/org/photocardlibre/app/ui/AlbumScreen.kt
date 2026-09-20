@@ -1,6 +1,7 @@
 package org.photocardlibre.app.ui
 
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,7 +38,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -45,6 +48,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,6 +65,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.SpanStyle
@@ -82,6 +88,43 @@ import java.util.Locale
 
 @Composable
 fun AlbumScreen(viewModel: AlbumViewModel) {
+    var destination by rememberSaveable { mutableStateOf(AppDestination.HOME) }
+
+    BackHandler(enabled = destination != AppDestination.HOME) {
+        destination = when (destination) {
+            AppDestination.INFO -> AppDestination.SETTINGS
+            AppDestination.SETTINGS -> AppDestination.HOME
+            AppDestination.HOME -> AppDestination.HOME
+        }
+    }
+
+    when (destination) {
+        AppDestination.HOME -> AlbumHomeScreen(
+            viewModel = viewModel,
+            onOpenSettings = { destination = AppDestination.SETTINGS },
+        )
+        AppDestination.SETTINGS -> SettingsScreen(
+            onBack = { destination = AppDestination.HOME },
+            onOpenInfo = { destination = AppDestination.INFO },
+        )
+        AppDestination.INFO -> InfoAppScreen(
+            onBack = { destination = AppDestination.SETTINGS },
+        )
+    }
+}
+
+private enum class AppDestination {
+    HOME,
+    SETTINGS,
+    INFO,
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AlbumHomeScreen(
+    viewModel: AlbumViewModel,
+    onOpenSettings: () -> Unit,
+) {
     val state = viewModel.state
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -164,6 +207,27 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.home_title)) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    actionIconContentColor = MaterialTheme.colorScheme.primary,
+                ),
+                actions = {
+                    IconButton(
+                        onClick = onOpenSettings,
+                        modifier = Modifier.testTag("apri_impostazioni"),
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_settings),
+                            contentDescription = stringResource(R.string.open_settings),
+                        )
+                    }
+                },
+            )
+        },
         bottomBar = {
             Column(
                 modifier = Modifier
