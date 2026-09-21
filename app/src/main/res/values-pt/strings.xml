@@ -16,7 +16,7 @@
     <string name="selected_photo_description">Fotografia selecionada</string>
     <string name="photo_thumbnail_description">Miniatura de %1$s</string>
     <string name="edit_photo">EDITAR FOTOGRAFIA</string>
-    <string name="caption_label">LEGENDA (até 4 palavras)</string>
+    <string name="caption_label">LEGENDA</string><string name="caption_support">Até 4 palavras</string>
     <string name="move_before">ANTES</string>
     <string name="move_after">DEPOIS</string>
     <string name="delete">ELIMINAR</string>

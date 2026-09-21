@@ -3,8 +3,11 @@ package org.photocardlibre.app.ui
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,15 +16,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -72,30 +76,31 @@ internal fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         ) {
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.language_section)) },
-                trailingContent = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+            AppPanel {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.language_section)) },
+                    supportingContent = {
                         Text(
                             stringResource(selectedLanguage.labelResource),
-                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                    },
+                    trailingContent = {
                         Text(
                             "›",
                             style = MaterialTheme.typography.headlineSmall,
-                            modifier = Modifier.padding(start = 12.dp).clearAndSetSemantics { },
+                            modifier = Modifier.clearAndSetSemantics { },
                         )
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 56.dp)
-                    .clickable(onClick = onOpenLanguage)
-                    .testTag("apri_lingua"),
-            )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp)
+                        .clickable(onClick = onOpenLanguage)
+                        .testTag("apri_lingua"),
+                )
+            }
 
-            SettingsDivider()
+            Spacer(Modifier.height(12.dp))
             SettingsSectionTitle(R.string.pdf_image_size_section)
             Text(
                 text = stringResource(R.string.pdf_image_size_support),
@@ -103,44 +108,50 @@ internal fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             )
-            listOf(
-                PdfImageSize.CM_5 to R.string.pdf_size_5_cm,
-                PdfImageSize.CM_7 to R.string.pdf_size_7_cm,
-                PdfImageSize.CM_10 to R.string.pdf_size_10_cm,
-            ).forEach { (size, label) ->
-                RadioSettingsOption(
-                    label = label,
-                    selected = selectedImageSize == size,
-                    onSelect = { onImageSizeSelected(size) },
-                    radioTestTag = "pdf_size_${size.centimeters}",
-                )
+            AppPanel {
+                listOf(
+                    PdfImageSize.CM_5 to R.string.pdf_size_5_cm,
+                    PdfImageSize.CM_7 to R.string.pdf_size_7_cm,
+                    PdfImageSize.CM_10 to R.string.pdf_size_10_cm,
+                ).forEach { (size, label) ->
+                    RadioSettingsOption(
+                        label = label,
+                        selected = selectedImageSize == size,
+                        onSelect = { onImageSizeSelected(size) },
+                        radioTestTag = "pdf_size_${size.centimeters}",
+                    )
+                }
             }
 
-            SettingsDivider()
+            Spacer(Modifier.height(12.dp))
             SettingsSectionTitle(R.string.pdf_caption_size_section)
-            listOf(
-                PdfCaptionSize.SMALL to R.string.caption_size_small,
-                PdfCaptionSize.MEDIUM to R.string.caption_size_medium,
-                PdfCaptionSize.LARGE to R.string.caption_size_large,
-            ).forEach { (size, label) ->
-                RadioSettingsOption(
-                    label = label,
-                    selected = selectedCaptionSize == size,
-                    onSelect = { onCaptionSizeSelected(size) },
-                    radioTestTag = "caption_size_${size.storageValue}",
-                )
+            AppPanel {
+                listOf(
+                    PdfCaptionSize.SMALL to R.string.caption_size_small,
+                    PdfCaptionSize.MEDIUM to R.string.caption_size_medium,
+                    PdfCaptionSize.LARGE to R.string.caption_size_large,
+                ).forEach { (size, label) ->
+                    RadioSettingsOption(
+                        label = label,
+                        selected = selectedCaptionSize == size,
+                        onSelect = { onCaptionSizeSelected(size) },
+                        radioTestTag = "caption_size_${size.storageValue}",
+                    )
+                }
             }
 
-            SettingsDivider()
+            Spacer(Modifier.height(12.dp))
             SettingsSectionTitle(R.string.app_info_section)
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.app_info_entry)) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 56.dp)
-                    .clickable(onClick = onOpenInfo)
-                    .testTag("apri_info_app"),
-            )
+            AppPanel {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.app_info_entry)) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp)
+                        .clickable(onClick = onOpenInfo)
+                        .testTag("apri_info_app"),
+                )
+            }
             Spacer(Modifier.height(12.dp))
         }
     }
@@ -190,8 +201,12 @@ private fun RadioSettingsOption(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
-            .clickable(role = Role.RadioButton, onClick = onSelect)
+            .heightIn(min = 56.dp)
+            .background(
+                if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+                else MaterialTheme.colorScheme.surface,
+            )
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onSelect)
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -206,6 +221,16 @@ private fun RadioSettingsOption(
 }
 
 @Composable
-private fun SettingsDivider() {
-    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+internal fun AppPanel(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.45f)),
+    ) {
+        Column(content = content)
+    }
 }

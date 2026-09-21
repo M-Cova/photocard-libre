@@ -16,7 +16,7 @@
     <string name="selected_photo_description">Foto seleccionada</string>
     <string name="photo_thumbnail_description">Miniatura de %1$s</string>
     <string name="edit_photo">EDITAR FOTO</string>
-    <string name="caption_label">PIE DE FOTO (hasta 4 palabras)</string>
+    <string name="caption_label">PIE DE FOTO</string><string name="caption_support">Hasta 4 palabras</string>
     <string name="move_before">ANTES</string>
     <string name="move_after">DESPUÉS</string>
     <string name="delete">ELIMINAR</string>

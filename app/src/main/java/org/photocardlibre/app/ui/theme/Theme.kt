@@ -53,8 +53,8 @@ private val PhotoCardTypography = Typography(
     headlineLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Bold,
-        fontSize = 36.sp,
-        lineHeight = 40.sp,
+        fontSize = 32.sp,
+        lineHeight = 38.sp,
     ),
     titleLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,

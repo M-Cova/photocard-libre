@@ -58,17 +58,25 @@ internal fun InfoAppScreen(
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
             )
-            HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
-            InfoItem(R.string.version_label, BuildConfig.VERSION_NAME)
-            InfoItem(R.string.software_license_label, stringResource(R.string.value_to_be_defined))
-            InfoItem(
-                R.string.graphic_resources_license_label,
-                stringResource(R.string.value_to_be_defined),
-            )
-            InfoItem(R.string.source_repository_label, stringResource(R.string.value_to_be_defined))
-            InfoItem(R.string.report_issue_label, stringResource(R.string.value_to_be_defined))
-            InfoItem(R.string.privacy_label, stringResource(R.string.privacy_description))
-            InfoItem(R.string.credits_label, stringResource(R.string.value_to_be_defined))
+            AppPanel(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                InfoItem(R.string.privacy_label, stringResource(R.string.privacy_description))
+            }
+            AppPanel(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                InfoItem(R.string.version_label, BuildConfig.VERSION_NAME)
+                InfoDivider()
+                InfoItem(R.string.software_license_label, stringResource(R.string.value_to_be_defined))
+                InfoDivider()
+                InfoItem(
+                    R.string.graphic_resources_license_label,
+                    stringResource(R.string.value_to_be_defined),
+                )
+                InfoDivider()
+                InfoItem(R.string.source_repository_label, stringResource(R.string.value_to_be_defined))
+                InfoDivider()
+                InfoItem(R.string.report_issue_label, stringResource(R.string.value_to_be_defined))
+                InfoDivider()
+                InfoItem(R.string.credits_label, stringResource(R.string.value_to_be_defined))
+            }
         }
     }
 }
@@ -82,5 +90,13 @@ private fun InfoItem(
         headlineContent = { Text(stringResource(label)) },
         supportingContent = { Text(value) },
         modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun InfoDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
     )
 }

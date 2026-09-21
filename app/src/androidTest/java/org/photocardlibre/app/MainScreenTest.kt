@@ -1,6 +1,8 @@
 package org.photocardlibre.app
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -18,6 +20,8 @@ import org.junit.Before
 import org.junit.Test
 import org.photocardlibre.app.ui.SavedPdfActions
 import org.photocardlibre.app.ui.PdfNameDialog
+import org.photocardlibre.app.ui.SelectedPhotoEditor
+import org.photocardlibre.app.model.PhotoEntry
 import org.junit.Assert.assertEquals
 import org.photocardlibre.app.settings.AppLanguage
 import org.photocardlibre.app.settings.SettingsRepository
@@ -65,6 +69,27 @@ class MainScreenTest {
         composeRule.onNodeWithTag("azioni_pdf_salvato").assertIsDisplayed()
         composeRule.onNodeWithText("OPEN PDF").assertIsDisplayed()
         composeRule.onNodeWithText("SHARE PDF").assertIsDisplayed()
+    }
+
+    @Test
+    fun reorderButtonsShowWhenASelectedPhotoCanMove() {
+        composeRule.setContent {
+            MaterialTheme {
+                SelectedPhotoEditor(
+                    photo = PhotoEntry("first", "/missing-photo.jpg", "First"),
+                    canMoveBefore = false,
+                    canMoveAfter = true,
+                    onCaptionChange = {},
+                    onMoveBefore = {},
+                    onMoveAfter = {},
+                    onDelete = {},
+                    onEdit = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("BEFORE").assertIsNotEnabled()
+        composeRule.onNodeWithText("AFTER").assertIsEnabled()
     }
 
     @Test

@@ -15,7 +15,7 @@
     <string name="selected_photo_description">Ausgewähltes Foto</string>
     <string name="photo_thumbnail_description">Vorschaubild von %1$s</string>
     <string name="edit_photo">FOTO BEARBEITEN</string>
-    <string name="caption_label">BESCHRIFTUNG (bis zu 4 Wörter)</string>
+    <string name="caption_label">BESCHRIFTUNG</string><string name="caption_support">Bis zu 4 Wörter</string>
     <string name="move_before">DAVOR</string>
     <string name="move_after">DANACH</string>
     <string name="delete">LÖSCHEN</string>

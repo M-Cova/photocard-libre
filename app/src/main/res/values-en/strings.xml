@@ -4,7 +4,7 @@
     <string name="action_add_photos">ADD PHOTOS</string><string name="action_preview">PREVIEW</string><string name="action_create_pdf">CREATE PDF</string>
     <string name="empty_album_hint">Tap ADD PHOTOS to begin.</string><plurals name="photo_count"><item quantity="one">%1$d photo</item><item quantity="other">%1$d photos</item></plurals>
     <string name="selected_photo_heading">SELECTED PHOTO</string><string name="selected_photo_description">Selected photo</string><string name="photo_thumbnail_description">Thumbnail of %1$s</string>
-    <string name="edit_photo">EDIT PHOTO</string><string name="caption_label">CAPTION (up to 4 words)</string><string name="move_before">BEFORE</string><string name="move_after">AFTER</string><string name="delete">DELETE</string><string name="image_unavailable">Image unavailable</string>
+    <string name="edit_photo">EDIT PHOTO</string><string name="caption_label">CAPTION</string><string name="caption_support">Up to 4 words</string><string name="move_before">BEFORE</string><string name="move_after">AFTER</string><string name="delete">DELETE</string><string name="image_unavailable">Image unavailable</string>
     <string name="crop_editor_title">EDIT PHOTO</string><string name="crop_original">ORIGINAL</string><string name="confirm">CONFIRM</string>
     <string name="preview_a4_title">A4 PREVIEW</string><string name="preview_page_description">Preview of page %1$d</string><string name="page_position">Page %1$d of %2$d</string><string name="close">CLOSE</string>
     <string name="pdf_name_title">PDF FILE NAME</string><string name="file_name_label">FILE NAME</string><string name="cancel">CANCEL</string><string name="save">SAVE</string><string name="open_pdf">OPEN PDF</string><string name="share_pdf">SHARE PDF</string>

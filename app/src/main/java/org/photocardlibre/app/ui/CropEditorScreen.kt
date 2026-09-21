@@ -29,10 +29,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -154,16 +154,25 @@ internal fun CropEditorScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(CropPreset.entries) { option ->
-                    if (option == preset) {
-                        Button(onClick = {}) { Text(cropPresetLabel(option)) }
-                    } else {
-                        OutlinedButton(onClick = {
-                            preset = option
-                            workingCrop = option.defaultRect(bitmap.width, bitmap.height)
-                        }) {
-                            Text(cropPresetLabel(option))
-                        }
-                    }
+                    FilterChip(
+                        selected = option == preset,
+                        onClick = {
+                            if (option != preset) {
+                                preset = option
+                                workingCrop = option.defaultRect(bitmap.width, bitmap.height)
+                            }
+                        },
+                        label = { Text(cropPresetLabel(option)) },
+                        leadingIcon = if (option == preset) {
+                            {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_check_circle),
+                                    contentDescription = null,
+                                    modifier = Modifier.width(18.dp).height(18.dp),
+                                )
+                            }
+                        } else null,
+                    )
                 }
             }
             BoxWithConstraints(

@@ -17,6 +17,7 @@ import org.photocardlibre.app.settings.PdfImageSize
 import org.photocardlibre.app.settings.PdfCaptionSize
 import org.photocardlibre.app.settings.SettingsRepository
 import org.photocardlibre.app.settings.AppLanguage
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -106,11 +107,19 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun importUris(uris: List<Uri>, defaultDisplayName: String) {
-        if (uris.isEmpty()) return
+        if (uris.isEmpty() || state.busyMessage != null || state.pdfSaving) return
         state = state.copy(busyMessage = R.string.message_importing_photos, userMessage = null)
         viewModelScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                cache.importUris(uris, defaultDisplayName)
+            val result = try {
+                withContext(Dispatchers.IO) { cache.importUris(uris, defaultDisplayName) }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                state = state.copy(
+                    busyMessage = null,
+                    userMessage = UiMessage(R.string.message_no_photos_opened),
+                )
+                return@launch
             }
             val message = when {
                 result.photos.isEmpty() -> UiMessage(R.string.message_no_photos_opened)
@@ -119,7 +128,10 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
             }
             state = state.copy(
                 album = state.album.add(result.photos), busyMessage = null,
-                userMessage = message, pdfPath = null, savedPdfUri = null,
+                userMessage = message,
+                pdfPath = if (result.photos.isEmpty()) state.pdfPath else null,
+                savedPdfUri = if (result.photos.isEmpty()) state.savedPdfUri else null,
+                previewPaths = if (result.photos.isEmpty()) state.previewPaths else emptyList(),
             )
         }
     }
@@ -128,24 +140,32 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
 
     fun updateCaption(value: String) {
         val change = state.album.updateCaption(value)
+        if (change.state == state.album && change.error == null) return
         state = state.copy(
             album = change.state,
             userMessage = if (change.error != null) {
                 UiMessage(R.string.message_caption_max_words)
             } else null,
-            pdfPath = null, savedPdfUri = null,
+            pdfPath = if (change.error == null) null else state.pdfPath,
+            savedPdfUri = if (change.error == null) null else state.savedPdfUri,
+            previewPaths = if (change.error == null) emptyList() else state.previewPaths,
         )
     }
 
     fun move(offset: Int) {
+        val moved = state.album.moveSelected(offset)
+        if (moved == state.album) return
         state = state.copy(
-            album = state.album.moveSelected(offset), pdfPath = null, savedPdfUri = null,
+            album = moved, pdfPath = null, savedPdfUri = null,
+            previewPaths = emptyList(),
         )
     }
 
     fun updateCrop(crop: CropRect?) {
+        val updatedAlbum = state.album.updateSelectedCrop(crop)
+        if (updatedAlbum == state.album) return
         state = state.copy(
-            album = state.album.updateSelectedCrop(crop),
+            album = updatedAlbum,
             pdfPath = null,
             savedPdfUri = null,
             previewPaths = emptyList(),
@@ -154,14 +174,19 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteSelected() {
         val change = state.album.deleteSelected()
-        change.removed?.let(cache::delete)
-        state = state.copy(album = change.state, pdfPath = null, savedPdfUri = null)
+        if (change.removed == null) return
+        cache.delete(change.removed)
+        state = state.copy(
+            album = change.state, pdfPath = null, savedPdfUri = null,
+            previewPaths = emptyList(),
+        )
     }
 
     fun preview() = render(includePdf = false)
     fun createPdf() = render(includePdf = true)
 
     private fun render(includePdf: Boolean) {
+        if (state.busyMessage != null || state.pdfSaving) return
         if (state.album.photos.isEmpty()) {
             state = state.copy(userMessage = UiMessage(R.string.message_add_photo_first))
             return

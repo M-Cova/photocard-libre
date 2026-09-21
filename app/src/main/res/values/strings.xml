@@ -13,7 +13,7 @@
     <string name="selected_photo_description">Selected photo</string>
     <string name="photo_thumbnail_description">Thumbnail of %1$s</string>
     <string name="edit_photo">EDIT PHOTO</string>
-    <string name="caption_label">CAPTION (up to 4 words)</string>
+    <string name="caption_label">CAPTION</string><string name="caption_support">Up to 4 words</string>
     <string name="move_before">BEFORE</string>
     <string name="move_after">AFTER</string>
     <string name="delete">DELETE</string>
