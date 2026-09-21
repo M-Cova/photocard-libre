@@ -46,10 +46,10 @@ class AndroidCoreTests(unittest.TestCase):
                     for index, first in enumerate(page.placements):
                         for second in page.placements[index + 1:]:
                             separated = (
-                                first.x + first.geometry.width + config.TILE_GAP_PT <= second.x + 1e-7
-                                or second.x + second.geometry.width + config.TILE_GAP_PT <= first.x + 1e-7
-                                or first.y + first.geometry.height + config.TILE_GAP_PT <= second.y + 1e-7
-                                or second.y + second.geometry.height + config.TILE_GAP_PT <= first.y + 1e-7
+                                first.x + first.geometry.width + config.CARD_SPACING_PT <= second.x + 1e-7
+                                or second.x + second.geometry.width + config.CARD_SPACING_PT <= first.x + 1e-7
+                                or first.y + first.geometry.height + config.CARD_SPACING_PT <= second.y + 1e-7
+                                or second.y + second.geometry.height + config.CARD_SPACING_PT <= first.y + 1e-7
                             )
                             self.assertTrue(separated)
 

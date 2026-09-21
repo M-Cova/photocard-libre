@@ -19,7 +19,7 @@ TILE_SIDE_PADDING_PT = cm_to_points(0.22)
 TILE_TOP_PADDING_PT = cm_to_points(0.22)
 TILE_CAPTION_AREA_PT = cm_to_points(0.90)
 TILE_BORDER_PT = 0.7
-TILE_GAP_PT = cm_to_points(0.35)
+CARD_SPACING_PT = cm_to_points(0.7)
 
 CAPTION_SIZE_SMALL = "small"
 CAPTION_SIZE_MEDIUM = "medium"

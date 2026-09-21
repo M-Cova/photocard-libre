@@ -113,14 +113,17 @@ class _PagePacker:
             Rect(
                 config.PAGE_MARGIN_PT,
                 config.PAGE_MARGIN_PT,
-                usable_width + config.TILE_GAP_PT,
-                usable_height + config.TILE_GAP_PT,
+                usable_width + config.CARD_SPACING_PT,
+                usable_height + config.CARD_SPACING_PT,
             )
         ]
 
     def place(self, geometry: TileGeometry) -> tuple[float, float] | None:
-        reserved_width = geometry.width + config.TILE_GAP_PT
-        reserved_height = geometry.height + config.TILE_GAP_PT
+        # MaxRects occupa la card piu la fascia di separazione a destra e in
+        # basso. Il Placement restituito conserva invece la geometria reale
+        # della card, quindi foto, didascalia e bordo non vengono ingranditi.
+        reserved_width = geometry.width + config.CARD_SPACING_PT
+        reserved_height = geometry.height + config.CARD_SPACING_PT
         fitting = [
             rect
             for rect in self.free
