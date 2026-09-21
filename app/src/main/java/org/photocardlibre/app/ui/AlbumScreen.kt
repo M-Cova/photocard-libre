@@ -2,6 +2,7 @@ package org.photocardlibre.app.ui
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -65,6 +66,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
@@ -89,6 +91,7 @@ import java.util.Locale
 @Composable
 fun AlbumScreen(viewModel: AlbumViewModel) {
     var destination by rememberSaveable { mutableStateOf(AppDestination.HOME) }
+    val activity = LocalActivity.current
 
     BackHandler(enabled = destination != AppDestination.HOME) {
         destination = when (destination) {
@@ -104,6 +107,10 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
             onOpenSettings = { destination = AppDestination.SETTINGS },
         )
         AppDestination.SETTINGS -> SettingsScreen(
+            selectedLanguage = viewModel.state.appLanguage,
+            onLanguageSelected = { language ->
+                viewModel.selectAppLanguage(language) { activity?.recreate() }
+            },
             selectedImageSize = viewModel.state.pdfImageSize,
             onImageSizeSelected = viewModel::selectPdfImageSize,
             selectedCaptionSize = viewModel.state.pdfCaptionSize,
@@ -141,8 +148,9 @@ private fun AlbumHomeScreen(
     var pdfNameError by rememberSaveable { mutableStateOf<String?>(null) }
     val photoPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(maxItems = 50),
-        viewModel::importUris,
-    )
+    ) { uris ->
+        viewModel.importUris(uris, context.getString(R.string.default_photo_name))
+    }
     val savePdf = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/pdf"),
     ) { destination ->
@@ -247,13 +255,13 @@ private fun AlbumHomeScreen(
                         onOpen = {
                             val result = PdfExport.open(context, savedUri)
                             if (result.isFailure) {
-                                viewModel.showMessage("Non è stato possibile aprire il PDF.")
+                                viewModel.showMessage(R.string.message_pdf_open_failed)
                             }
                         },
                         onShare = {
                             val result = PdfExport.share(context, savedUri)
                             if (result.isFailure) {
-                                viewModel.showMessage("Non è stato possibile condividere il PDF.")
+                                viewModel.showMessage(R.string.message_pdf_share_failed)
                             }
                         },
                     )
@@ -295,7 +303,7 @@ private fun AlbumHomeScreen(
                             )
                             Spacer(Modifier.width(actionSpacing))
                             Text(
-                                "AGGIUNGI FOTO",
+                                stringResource(R.string.action_add_photos),
                                 style = actionTextStyle,
                                 textAlign = TextAlign.Center,
                                 maxLines = 2,
@@ -314,7 +322,7 @@ private fun AlbumHomeScreen(
                             )
                             Spacer(Modifier.width(actionSpacing))
                             Text(
-                                "ANTEPRIMA",
+                                stringResource(R.string.action_preview),
                                 style = actionTextStyle,
                                 textAlign = TextAlign.Center,
                                 maxLines = 2,
@@ -332,7 +340,7 @@ private fun AlbumHomeScreen(
                             )
                             Spacer(Modifier.width(actionSpacing))
                             Text(
-                                "CREA PDF",
+                                stringResource(R.string.action_create_pdf),
                                 style = actionTextStyle,
                                 textAlign = TextAlign.Center,
                                 maxLines = 2,
@@ -349,21 +357,25 @@ private fun AlbumHomeScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item {
+                val appName = stringResource(R.string.app_name)
                 Text(
                     text = buildAnnotatedString {
                         withStyle(SpanStyle(color = MaterialTheme.colorScheme.onPrimaryContainer)) {
-                            append("PhotoCard")
+                            append(appName.substringBeforeLast(' '))
                         }
                         append(" ")
                         withStyle(SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
-                            append("Libre")
+                            append(appName.substringAfterLast(' '))
                         }
                     },
                     style = MaterialTheme.typography.headlineLarge,
                 )
                 Text(
-                    if (state.album.photos.size == 1) "1 fotografia"
-                    else "${state.album.photos.size} fotografie",
+                    pluralStringResource(
+                        R.plurals.photo_count,
+                        state.album.photos.size,
+                        state.album.photos.size,
+                    ),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -377,7 +389,10 @@ private fun AlbumHomeScreen(
                         ),
                         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                     ) {
-                        Text("Premi AGGIUNGI FOTO per iniziare.", modifier = Modifier.padding(24.dp))
+                        Text(
+                            stringResource(R.string.empty_album_hint),
+                            modifier = Modifier.padding(24.dp),
+                        )
                     }
                 }
             } else {
@@ -413,7 +428,7 @@ private fun AlbumHomeScreen(
             state.userMessage?.let { message ->
                 item {
                     Text(
-                        message,
+                        stringResource(message.resource, *message.formatArgs.toTypedArray()),
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -432,9 +447,16 @@ private fun AlbumHomeScreen(
                             Modifier.padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            Text("PDF pronto (${state.pdfPageCount} pagine)", fontWeight = FontWeight.Bold)
+                            Text(
+                                pluralStringResource(
+                                    R.plurals.pdf_ready,
+                                    state.pdfPageCount,
+                                    state.pdfPageCount,
+                                ),
+                                fontWeight = FontWeight.Bold,
+                            )
                             if (state.pdfSaving) {
-                                Text("Salvataggio PDF…")
+                                Text(stringResource(R.string.pdf_saving))
                             }
                         }
                     }
@@ -448,7 +470,7 @@ private fun AlbumHomeScreen(
         AlertDialog(
             onDismissRequest = {},
             confirmButton = {},
-            title = { Text(state.busyMessage) },
+            title = { Text(stringResource(state.busyMessage)) },
             text = {
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
@@ -476,7 +498,7 @@ private fun AlbumHomeScreen(
                 val normalizedName = PdfExport.normalizeFileName(proposedName)
                 val source = state.pdfPath
                 if (normalizedName == null) {
-                    pdfNameError = "Inserisci un nome valido per il PDF."
+                    pdfNameError = context.getString(R.string.pdf_name_invalid)
                 } else if (source == null) {
                     pendingPdfName = null
                     viewModel.onPdfSaveFailed()
@@ -500,22 +522,24 @@ internal fun PdfNameDialog(
 ) {
     AlertDialog(
         onDismissRequest = onCancel,
-        title = { Text("NOME FILE PDF") },
+        title = { Text(stringResource(R.string.pdf_name_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = onNameChange,
                     singleLine = true,
-                    label = { Text("NOME FILE") },
+                    label = { Text(stringResource(R.string.file_name_label)) },
                     isError = error != null,
                     modifier = Modifier.fillMaxWidth().testTag("nome_file_pdf"),
                 )
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             }
         },
-        dismissButton = { TextButton(onClick = onCancel) { Text("ANNULLA") } },
-        confirmButton = { Button(onClick = onSave) { Text("SALVA") } },
+        dismissButton = {
+            TextButton(onClick = onCancel) { Text(stringResource(R.string.cancel)) }
+        },
+        confirmButton = { Button(onClick = onSave) { Text(stringResource(R.string.save)) } },
     )
 }
 
@@ -529,10 +553,10 @@ internal fun SavedPdfActions(onOpen: () -> Unit, onShare: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Button(onClick = onOpen, modifier = Modifier.weight(1f)) {
-            Text("APRI PDF")
+            Text(stringResource(R.string.open_pdf))
         }
         OutlinedButton(onClick = onShare, modifier = Modifier.weight(1f)) {
-            Text("CONDIVIDI PDF")
+            Text(stringResource(R.string.share_pdf))
         }
     }
 }
@@ -558,13 +582,13 @@ private fun PhotoThumbnail(photo: PhotoEntry, selected: Boolean, onClick: () -> 
                 LocalImage(
                     photo.localPath,
                     Modifier.fillMaxWidth().aspectRatio(4f / 3f),
-                    "Miniatura ${photo.displayName}",
+                    stringResource(R.string.photo_thumbnail_description, photo.displayName),
                     photo.crop,
                 )
                 if (selected) {
                     Icon(
                         painter = painterResource(R.drawable.ic_check_circle),
-                        contentDescription = "Fotografia selezionata",
+                        contentDescription = stringResource(R.string.selected_photo_description),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -604,14 +628,14 @@ internal fun SelectedPhotoEditor(
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
-                "FOTOGRAFIA SELEZIONATA",
+                stringResource(R.string.selected_photo_heading),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
             LocalImage(
                 photo.localPath,
                 Modifier.fillMaxWidth().aspectRatio(4f / 3f),
-                "Fotografia selezionata",
+                stringResource(R.string.selected_photo_description),
                 photo.crop,
             )
             Button(
@@ -624,12 +648,12 @@ internal fun SelectedPhotoEditor(
                     tint = MaterialTheme.colorScheme.secondaryContainer,
                 )
                 Spacer(Modifier.width(8.dp))
-                Text("MODIFICA FOTO")
+                Text(stringResource(R.string.edit_photo))
             }
             OutlinedTextField(
                 value = photo.caption,
                 onValueChange = onCaptionChange,
-                label = { Text("DIDASCALIA (massimo 4 parole)") },
+                label = { Text(stringResource(R.string.caption_label)) },
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedLabelColor = MaterialTheme.colorScheme.secondary,
@@ -646,19 +670,19 @@ internal fun SelectedPhotoEditor(
                     onClick = onMoveBefore,
                     modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                 ) {
-                    Text("PRIMA")
+                    Text(stringResource(R.string.move_before))
                 }
                 OutlinedButton(
                     onClick = onMoveAfter,
                     modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                 ) {
-                    Text("DOPO")
+                    Text(stringResource(R.string.move_after))
                 }
                 TextButton(
                     onClick = onDelete,
                     modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                 ) {
-                    Text("ELIMINA")
+                    Text(stringResource(R.string.delete))
                 }
             }
         }
@@ -684,7 +708,7 @@ private fun LocalImage(
             modifier.background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center,
         ) {
-            Text("Immagine non disponibile")
+            Text(stringResource(R.string.image_unavailable))
         }
     }
 }
@@ -693,10 +717,12 @@ private fun LocalImage(
 private fun PreviewDialog(paths: List<String>, onClose: () -> Unit) {
     AlertDialog(
         onDismissRequest = onClose,
-        confirmButton = { Button(onClick = onClose) { Text("CHIUDI") } },
+        confirmButton = {
+            Button(onClick = onClose) { Text(stringResource(R.string.close)) }
+        },
         title = {
             Text(
-                "ANTEPRIMA A4",
+                stringResource(R.string.preview_a4_title),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
@@ -708,9 +734,9 @@ private fun PreviewDialog(paths: List<String>, onClose: () -> Unit) {
                         LocalImage(
                             paths[index],
                             Modifier.width(260.dp).height(368.dp),
-                            "Anteprima pagina ${index + 1}",
+                            stringResource(R.string.preview_page_description, index + 1),
                         )
-                        Text("Pagina ${index + 1} di ${paths.size}")
+                        Text(stringResource(R.string.page_position, index + 1, paths.size))
                     }
                 }
             }

@@ -19,7 +19,7 @@ class PhotoCacheAdapter(private val context: Context) {
         check(inputDirectory.mkdirs() || inputDirectory.isDirectory)
     }
 
-    fun importUris(uris: List<Uri>): ImportResult {
+    fun importUris(uris: List<Uri>, defaultDisplayName: String): ImportResult {
         inputDirectory.mkdirs()
         val photos = mutableListOf<PhotoEntry>()
         var rejected = 0
@@ -46,7 +46,7 @@ class PhotoCacheAdapter(private val context: Context) {
                 photos += PhotoEntry(
                     id = id,
                     localPath = outputFile.absolutePath,
-                    displayName = displayName(uri) ?: "Fotografia",
+                    displayName = displayName(uri) ?: defaultDisplayName,
                 )
             } catch (_: Exception) {
                 destination?.delete()

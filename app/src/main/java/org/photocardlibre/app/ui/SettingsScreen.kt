@@ -28,9 +28,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
@@ -39,12 +36,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.photocardlibre.app.R
+import org.photocardlibre.app.settings.AppLanguage
 import org.photocardlibre.app.settings.PdfCaptionSize
 import org.photocardlibre.app.settings.PdfImageSize
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SettingsScreen(
+    selectedLanguage: AppLanguage,
+    onLanguageSelected: (AppLanguage) -> Unit,
     selectedImageSize: PdfImageSize,
     onImageSizeSelected: (PdfImageSize) -> Unit,
     selectedCaptionSize: PdfCaptionSize,
@@ -55,8 +55,6 @@ internal fun SettingsScreen(
     onOpenInfo: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var selectedLanguage by rememberSaveable { mutableIntStateOf(R.string.language_system) }
-
     BackHandler(onBack = onBack)
 
     Scaffold(
@@ -79,18 +77,21 @@ internal fun SettingsScreen(
             SettingsSectionTitle(R.string.language_section)
             RadioSettingsOption(
                 label = R.string.language_system,
-                selected = selectedLanguage == R.string.language_system,
-                onSelect = { selectedLanguage = R.string.language_system },
+                selected = selectedLanguage == AppLanguage.SYSTEM,
+                onSelect = { onLanguageSelected(AppLanguage.SYSTEM) },
+                radioTestTag = "language_system",
             )
             RadioSettingsOption(
                 label = R.string.language_italian,
-                selected = selectedLanguage == R.string.language_italian,
-                onSelect = { selectedLanguage = R.string.language_italian },
+                selected = selectedLanguage == AppLanguage.ITALIAN,
+                onSelect = { onLanguageSelected(AppLanguage.ITALIAN) },
+                radioTestTag = "language_italian",
             )
             RadioSettingsOption(
                 label = R.string.language_english,
-                selected = selectedLanguage == R.string.language_english,
-                onSelect = { selectedLanguage = R.string.language_english },
+                selected = selectedLanguage == AppLanguage.ENGLISH,
+                onSelect = { onLanguageSelected(AppLanguage.ENGLISH) },
+                radioTestTag = "language_english",
             )
 
             SettingsDivider()

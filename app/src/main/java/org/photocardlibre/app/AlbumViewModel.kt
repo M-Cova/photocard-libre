@@ -2,6 +2,7 @@ package org.photocardlibre.app
 
 import android.app.Application
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,20 +11,25 @@ import androidx.lifecycle.viewModelScope
 import org.photocardlibre.app.export.PdfOutputConfig
 import org.photocardlibre.app.model.AlbumState
 import org.photocardlibre.app.model.CropRect
-import org.photocardlibre.app.python.AlbumRenderException
 import org.photocardlibre.app.python.PythonAlbumBridge
 import org.photocardlibre.app.storage.PhotoCacheAdapter
 import org.photocardlibre.app.settings.PdfImageSize
 import org.photocardlibre.app.settings.PdfCaptionSize
 import org.photocardlibre.app.settings.SettingsRepository
+import org.photocardlibre.app.settings.AppLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+data class UiMessage(
+    @StringRes val resource: Int,
+    val formatArgs: List<Any> = emptyList(),
+)
+
 data class AlbumUiState(
     val album: AlbumState = AlbumState(),
-    val busyMessage: String? = null,
-    val userMessage: String? = null,
+    @StringRes val busyMessage: Int? = null,
+    val userMessage: UiMessage? = null,
     val previewPaths: List<String> = emptyList(),
     val previewVisible: Boolean = false,
     val pdfPath: String? = null,
@@ -34,6 +40,7 @@ data class AlbumUiState(
     val pdfImageSize: PdfImageSize = PdfImageSize.DEFAULT,
     val pdfCaptionSize: PdfCaptionSize = PdfCaptionSize.DEFAULT,
     val cuttingBorderEnabled: Boolean = true,
+    val appLanguage: AppLanguage = AppLanguage.DEFAULT,
 ) {
     val hasSavedPdfActions: Boolean
         get() = !pdfSaving && !pdfPath.isNullOrBlank() && !savedPdfUri.isNullOrBlank()
@@ -49,6 +56,11 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         cache.startFreshSession()
+        viewModelScope.launch {
+            settings.appLanguage.collect { language ->
+                state = state.copy(appLanguage = language)
+            }
+        }
         viewModelScope.launch {
             settings.pdfImageSize.collect { savedSize ->
                 state = state.copy(pdfImageSize = savedSize)
@@ -66,10 +78,18 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun selectAppLanguage(language: AppLanguage, onSaved: () -> Unit) {
+        if (language == state.appLanguage) return
+        state = state.copy(appLanguage = language, busyMessage = null, userMessage = null)
+        viewModelScope.launch {
+            settings.setAppLanguage(language)
+            onSaved()
+        }
+    }
+
     fun selectPdfImageSize(size: PdfImageSize) {
         if (size == state.pdfImageSize) return
 
-        val oldBorder = state.cuttingBorderEnabled
         state = state.copy(
             pdfImageSize = size,
             previewPaths = emptyList(),
@@ -97,14 +117,16 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { settings.setPdfCaptionSize(size) }
     }
 
-    fun importUris(uris: List<Uri>) {
+    fun importUris(uris: List<Uri>, defaultDisplayName: String) {
         if (uris.isEmpty()) return
-        state = state.copy(busyMessage = "Importazione fotografie…", userMessage = null)
+        state = state.copy(busyMessage = R.string.message_importing_photos, userMessage = null)
         viewModelScope.launch {
-            val result = withContext(Dispatchers.IO) { cache.importUris(uris) }
+            val result = withContext(Dispatchers.IO) {
+                cache.importUris(uris, defaultDisplayName)
+            }
             val message = when {
-                result.photos.isEmpty() -> "Non è stato possibile aprire le fotografie selezionate. Usa JPEG o PNG."
-                result.rejectedCount > 0 -> "Alcune fotografie non sono state aperte. Usa JPEG o PNG."
+                result.photos.isEmpty() -> UiMessage(R.string.message_no_photos_opened)
+                result.rejectedCount > 0 -> UiMessage(R.string.message_some_photos_not_opened)
                 else -> null
             }
             state = state.copy(
@@ -119,7 +141,10 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
     fun updateCaption(value: String) {
         val change = state.album.updateCaption(value)
         state = state.copy(
-            album = change.state, userMessage = change.error,
+            album = change.state,
+            userMessage = if (change.error != null) {
+                UiMessage(R.string.message_caption_max_words)
+            } else null,
             pdfPath = null, savedPdfUri = null,
         )
     }
@@ -150,11 +175,12 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun render(includePdf: Boolean) {
         if (state.album.photos.isEmpty()) {
-            state = state.copy(userMessage = "Aggiungi almeno una fotografia.")
+            state = state.copy(userMessage = UiMessage(R.string.message_add_photo_first))
             return
         }
         state = state.copy(
-            busyMessage = if (includePdf) "Creazione PDF…" else "Creazione anteprima…",
+            busyMessage = if (includePdf) R.string.message_creating_pdf
+            else R.string.message_creating_preview,
             userMessage = null,
         )
         val photos = state.album.photos
@@ -186,11 +212,10 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
                         userMessage = null,
                     )
                 },
-                onFailure = { error ->
+                onFailure = {
                     state = state.copy(
                         busyMessage = null,
-                        userMessage = if (error is AlbumRenderException) error.message
-                            else "Errore durante la creazione del PDF.",
+                        userMessage = UiMessage(R.string.message_pdf_creation_error),
                     )
                 },
             )
@@ -198,16 +223,21 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun closePreview() { state = state.copy(previewVisible = false) }
-    fun showMessage(message: String?) { state = state.copy(userMessage = message) }
+    fun showMessage(@StringRes message: Int) {
+        state = state.copy(userMessage = UiMessage(message))
+    }
 
     fun onPdfSaved(uri: Uri, inDownloads: Boolean) {
         state = state.copy(
             savedPdfUri = uri.toString(),
             pdfSaving = false,
             userMessage = if (inDownloads) {
-                "PDF salvato in ${PdfOutputConfig.userVisibleDestination}"
+                UiMessage(
+                    R.string.message_pdf_saved_downloads,
+                    listOf(PdfOutputConfig.userVisibleDestination),
+                )
             } else {
-                "PDF salvato nella posizione scelta."
+                UiMessage(R.string.message_pdf_saved_selected_location)
             },
         )
     }
@@ -219,7 +249,7 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
     fun onPdfSaveFailed() {
         state = state.copy(
             pdfSaving = false,
-            userMessage = "Il PDF è stato creato ma non è stato possibile salvarlo.",
+            userMessage = UiMessage(R.string.message_pdf_save_failed),
         )
     }
 }

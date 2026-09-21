@@ -1,38 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PhotoCard Libre</string>
+    <string name="app_name" translatable="false">PhotoCard Libre</string>
     <string name="home_title">HOME</string>
-    <string name="open_settings">Apri impostazioni</string>
-    <string name="navigate_back">Indietro</string>
-
-    <string name="settings_title">IMPOSTAZIONI</string>
-    <string name="language_section">LINGUA</string>
-    <string name="language_system">Sistema</string>
+    <string name="open_settings">Open settings</string>
+    <string name="navigate_back">Back</string>
+    <string name="action_add_photos">ADD PHOTOS</string>
+    <string name="action_preview">PREVIEW</string>
+    <string name="action_create_pdf">CREATE PDF</string>
+    <string name="empty_album_hint">Tap ADD PHOTOS to begin.</string>
+    <plurals name="photo_count"><item quantity="one">%1$d photo</item><item quantity="other">%1$d photos</item></plurals>
+    <string name="selected_photo_heading">SELECTED PHOTO</string>
+    <string name="selected_photo_description">Selected photo</string>
+    <string name="photo_thumbnail_description">Thumbnail of %1$s</string>
+    <string name="edit_photo">EDIT PHOTO</string>
+    <string name="caption_label">CAPTION (up to 4 words)</string>
+    <string name="move_before">BEFORE</string>
+    <string name="move_after">AFTER</string>
+    <string name="delete">DELETE</string>
+    <string name="image_unavailable">Image unavailable</string>
+    <string name="crop_editor_title">EDIT PHOTO</string>
+    <string name="crop_original">ORIGINAL</string>
+    <string name="confirm">CONFIRM</string>
+    <string name="preview_a4_title">A4 PREVIEW</string>
+    <string name="preview_page_description">Preview of page %1$d</string>
+    <string name="page_position">Page %1$d of %2$d</string>
+    <string name="close">CLOSE</string>
+    <string name="pdf_name_title">PDF FILE NAME</string>
+    <string name="file_name_label">FILE NAME</string>
+    <string name="cancel">CANCEL</string>
+    <string name="save">SAVE</string>
+    <string name="open_pdf">OPEN PDF</string>
+    <string name="share_pdf">SHARE PDF</string>
+    <plurals name="pdf_ready"><item quantity="one">PDF ready (%1$d page)</item><item quantity="other">PDF ready (%1$d pages)</item></plurals>
+    <string name="pdf_saving">Saving PDF…</string>
+    <string name="pdf_name_invalid">Enter a valid PDF name.</string>
+    <string name="pdf_open_chooser_title">Open PDF</string>
+    <string name="pdf_share_chooser_title">Share PDF</string>
+    <string name="message_importing_photos">Importing photos…</string>
+    <string name="message_no_photos_opened">The selected photos could not be opened. Use JPEG or PNG.</string>
+    <string name="message_some_photos_not_opened">Some photos could not be opened. Use JPEG or PNG.</string>
+    <string name="message_caption_max_words">The caption can contain up to 4 words.</string>
+    <string name="message_add_photo_first">Add at least one photo.</string>
+    <string name="message_creating_pdf">Creating PDF…</string>
+    <string name="message_creating_preview">Creating preview…</string>
+    <string name="message_pdf_creation_error">An error occurred while creating the PDF.</string>
+    <string name="message_pdf_saved_downloads">PDF saved in %1$s</string>
+    <string name="message_pdf_saved_selected_location">PDF saved in the selected location.</string>
+    <string name="message_pdf_save_failed">The PDF was created but could not be saved.</string>
+    <string name="message_pdf_open_failed">The PDF could not be opened.</string>
+    <string name="message_pdf_share_failed">The PDF could not be shared.</string>
+    <string name="default_photo_name">Photo</string>
+    <string name="settings_title">SETTINGS</string>
+    <string name="language_section">LANGUAGE</string>
+    <string name="language_system">System</string>
     <string name="language_italian">Italiano</string>
     <string name="language_english">English</string>
-    <string name="pdf_image_size_section">DIMENSIONE IMMAGINI PDF</string>
-    <string name="pdf_image_size_support">Dimensione massima calcolata sul lato più lungo</string>
-    <string name="pdf_size_5_cm">5 cm</string>
-    <string name="pdf_size_7_cm">7 cm</string>
-    <string name="pdf_size_10_cm">10 cm</string>
-    <string name="pdf_caption_size_section">DIMENSIONE DIDASCALIA PDF</string>
-    <string name="caption_size_small">Piccola</string>
-    <string name="caption_size_medium">Media</string>
-    <string name="caption_size_large">Grande</string>
-    <string name="cutting_border_section">BORDO DI TAGLIO</string>
-    <string name="cutting_border_enabled">Mostra il bordo di taglio</string>
-    <string name="app_info_section">INFO SULL\'APP</string>
-    <string name="app_info_entry">Info sull\'app</string>
-
-    <string name="app_info_title">INFO SULL\'APP</string>
-    <string name="app_description">App libera per creare schede fotografiche stampabili con didascalie.</string>
-    <string name="version_label">Versione</string>
-    <string name="software_license_label">Licenza software</string>
-    <string name="graphic_resources_license_label">Licenza risorse grafiche</string>
-    <string name="source_repository_label">Repository sorgente</string>
-    <string name="report_issue_label">Segnala un problema</string>
+    <string name="pdf_image_size_section">PDF IMAGE SIZE</string>
+    <string name="pdf_image_size_support">Maximum size calculated on the longest side</string>
+    <string name="pdf_size_5_cm" translatable="false">5 cm</string>
+    <string name="pdf_size_7_cm" translatable="false">7 cm</string>
+    <string name="pdf_size_10_cm" translatable="false">10 cm</string>
+    <string name="pdf_caption_size_section">PDF CAPTION SIZE</string>
+    <string name="caption_size_small">Small</string>
+    <string name="caption_size_medium">Medium</string>
+    <string name="caption_size_large">Large</string>
+    <string name="cutting_border_section">CUTTING BORDER</string>
+    <string name="cutting_border_enabled">Show the cutting border</string>
+    <string name="app_info_section">APP INFO</string>
+    <string name="app_info_entry">App info</string>
+    <string name="app_info_title">APP INFO</string>
+    <string name="app_description">Free app for creating printable photo cards with captions.</string>
+    <string name="version_label">Version</string>
+    <string name="software_license_label">Software license</string>
+    <string name="graphic_resources_license_label">Graphic resources license</string>
+    <string name="source_repository_label">Source repository</string>
+    <string name="report_issue_label">Report an issue</string>
     <string name="privacy_label">Privacy</string>
-    <string name="privacy_description">Le fotografie vengono elaborate localmente sul dispositivo.</string>
-    <string name="credits_label">Crediti</string>
-    <string name="value_to_be_defined">Da definire</string>
+    <string name="privacy_description">Photos are processed locally on the device.</string>
+    <string name="credits_label">Credits</string>
+    <string name="value_to_be_defined">To be defined</string>
 </resources>

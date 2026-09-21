@@ -14,21 +14,33 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import org.junit.Rule
+import org.junit.Before
 import org.junit.Test
 import org.photocardlibre.app.ui.SavedPdfActions
 import org.photocardlibre.app.ui.PdfNameDialog
 import org.junit.Assert.assertEquals
+import org.photocardlibre.app.settings.AppLanguage
+import org.photocardlibre.app.settings.SettingsRepository
+import kotlinx.coroutines.runBlocking
 
 class MainScreenTest {
     @get:Rule
     val composeRule = createAndroidComposeRule<MainActivity>()
 
+    @Before
+    fun useEnglish() {
+        runBlocking {
+            SettingsRepository(composeRule.activity).setAppLanguage(AppLanguage.ENGLISH)
+        }
+        composeRule.activityRule.scenario.recreate()
+    }
+
     @Test
     fun mainActionsAreVisible() {
         composeRule.onNodeWithText("PhotoCard Libre").assertIsDisplayed()
-        composeRule.onNodeWithText("AGGIUNGI FOTO").assertIsDisplayed()
-        composeRule.onNodeWithText("ANTEPRIMA").assertIsDisplayed()
-        composeRule.onNodeWithText("CREA PDF").assertIsDisplayed()
+        composeRule.onNodeWithText("ADD PHOTOS").assertIsDisplayed()
+        composeRule.onNodeWithText("PREVIEW").assertIsDisplayed()
+        composeRule.onNodeWithText("CREATE PDF").assertIsDisplayed()
         composeRule.onNodeWithTag("azioni_principali").assertIsDisplayed()
     }
 
@@ -51,8 +63,8 @@ class MainScreenTest {
         }
 
         composeRule.onNodeWithTag("azioni_pdf_salvato").assertIsDisplayed()
-        composeRule.onNodeWithText("APRI PDF").assertIsDisplayed()
-        composeRule.onNodeWithText("CONDIVIDI PDF").assertIsDisplayed()
+        composeRule.onNodeWithText("OPEN PDF").assertIsDisplayed()
+        composeRule.onNodeWithText("SHARE PDF").assertIsDisplayed()
     }
 
     @Test
@@ -72,11 +84,11 @@ class MainScreenTest {
             }
         }
 
-        composeRule.onNodeWithText("NOME FILE PDF").assertIsDisplayed()
+        composeRule.onNodeWithText("PDF FILE NAME").assertIsDisplayed()
         composeRule.onNodeWithTag("nome_file_pdf").assertTextContains(defaultName)
         composeRule.onNodeWithTag("nome_file_pdf").performTextClearance()
         composeRule.onNodeWithTag("nome_file_pdf").performTextInput("VACANZE MARE")
-        composeRule.onNodeWithText("SALVA").performClick()
+        composeRule.onNodeWithText("SAVE").performClick()
         composeRule.runOnIdle { assertEquals("VACANZE MARE", savedName) }
     }
 }

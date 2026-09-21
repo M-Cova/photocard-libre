@@ -62,7 +62,7 @@ Il test Compose strumentale è compilato nell'APK di test ma richiede un device/
 ## Prova obbligatoria su telefono ARM64
 
 ```bash
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb install -r app/build/outputs/apk/debug/PhotoCard-Libre-debug.apk
 adb shell am start -n org.photocardlibre.app/.MainActivity
 ```
 

@@ -21,6 +21,20 @@ class SettingsRepository internal constructor(
 ) {
     constructor(context: Context) : this(context.settingsDataStore)
 
+    val appLanguage: Flow<AppLanguage> = dataStore.data
+        .catch { error ->
+            if (error is IOException) emit(emptyPreferences()) else throw error
+        }
+        .map { preferences ->
+            AppLanguage.fromStorageValue(preferences[APP_LANGUAGE])
+        }
+
+    suspend fun setAppLanguage(language: AppLanguage) {
+        dataStore.edit { preferences ->
+            preferences[APP_LANGUAGE] = language.storageValue
+        }
+    }
+
     val pdfImageSize: Flow<PdfImageSize> = dataStore.data
         .catch { error ->
             if (error is IOException) emit(emptyPreferences()) else throw error
@@ -64,6 +78,7 @@ class SettingsRepository internal constructor(
     }
 
     private companion object {
+        val APP_LANGUAGE = stringPreferencesKey("app_language")
         val CUTTING_BORDER_ENABLED = booleanPreferencesKey("cutting_border_enabled")
         val PDF_CAPTION_SIZE = stringPreferencesKey("pdf_caption_size")
         val PDF_IMAGE_SIZE_CM = intPreferencesKey("pdf_image_size_cm")

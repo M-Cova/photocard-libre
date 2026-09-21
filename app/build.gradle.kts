@@ -5,6 +5,10 @@ plugins {
     id("com.chaquo.python")
 }
 
+base {
+    archivesName.set("PhotoCard-Libre")
+}
+
 android {
     namespace = "org.photocardlibre.app"
     compileSdk = 35
@@ -38,6 +42,11 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    bundle {
+        language {
+            enableSplit = false
+        }
     }
 }
 

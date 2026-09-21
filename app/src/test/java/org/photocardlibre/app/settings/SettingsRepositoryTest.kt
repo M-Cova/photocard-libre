@@ -18,6 +18,55 @@ class SettingsRepositoryTest {
     val temporaryFolder = TemporaryFolder()
 
     @Test
+    fun languageDefaultsToSystemAndEverySelectionPersists() = runBlocking {
+        AppLanguage.entries.forEach { selectedLanguage ->
+            val preferencesFile = File(
+                temporaryFolder.newFolder("language_${selectedLanguage.storageValue}"),
+                "settings.preferences_pb",
+            )
+            val firstScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            val firstRepository = SettingsRepository(
+                PreferenceDataStoreFactory.create(scope = firstScope) { preferencesFile },
+            )
+            assertEquals(AppLanguage.SYSTEM, firstRepository.appLanguage.first())
+            firstRepository.setAppLanguage(selectedLanguage)
+            assertEquals(selectedLanguage, firstRepository.appLanguage.first())
+            firstScope.cancel()
+
+            val secondScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            try {
+                val recreatedRepository = SettingsRepository(
+                    PreferenceDataStoreFactory.create(scope = secondScope) { preferencesFile },
+                )
+                assertEquals(selectedLanguage, recreatedRepository.appLanguage.first())
+            } finally {
+                secondScope.cancel()
+            }
+        }
+    }
+
+    @Test
+    fun changingLanguageDoesNotChangeOtherSettings() = runBlocking {
+        val preferencesFile = File(temporaryFolder.root, "independent_settings.preferences_pb")
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        try {
+            val repository = SettingsRepository(
+                PreferenceDataStoreFactory.create(scope = scope) { preferencesFile },
+            )
+            repository.setPdfImageSize(PdfImageSize.CM_10)
+            repository.setPdfCaptionSize(PdfCaptionSize.LARGE)
+            repository.setCuttingBorderEnabled(false)
+            repository.setAppLanguage(AppLanguage.ITALIAN)
+
+            assertEquals(PdfImageSize.CM_10, repository.pdfImageSize.first())
+            assertEquals(PdfCaptionSize.LARGE, repository.pdfCaptionSize.first())
+            assertEquals(false, repository.cuttingBorderEnabled.first())
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
     fun selectionPersistsWhenRepositoryIsRecreated() = runBlocking {
         val preferencesFile = File(temporaryFolder.root, "settings.preferences_pb")
         val firstScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)

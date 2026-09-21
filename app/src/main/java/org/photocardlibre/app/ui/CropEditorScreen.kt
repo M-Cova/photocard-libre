@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -92,7 +93,7 @@ internal fun CropEditorScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("MODIFICA FOTO") },
+                title = { Text(stringResource(R.string.crop_editor_title)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -105,7 +106,7 @@ internal fun CropEditorScreen(
                     ) {
                         Icon(
                             painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Indietro",
+                            contentDescription = stringResource(R.string.navigate_back),
                         )
                     }
                 },
@@ -135,7 +136,7 @@ internal fun CropEditorScreen(
                             .weight(1f)
                             .testTag("conferma_crop"),
                     ) {
-                        Text("CONFERMA")
+                        Text(stringResource(R.string.confirm))
                     }
                 }
             }
@@ -154,13 +155,13 @@ internal fun CropEditorScreen(
             ) {
                 items(CropPreset.entries) { option ->
                     if (option == preset) {
-                        Button(onClick = {}) { Text(option.label) }
+                        Button(onClick = {}) { Text(cropPresetLabel(option)) }
                     } else {
                         OutlinedButton(onClick = {
                             preset = option
                             workingCrop = option.defaultRect(bitmap.width, bitmap.height)
                         }) {
-                            Text(option.label)
+                            Text(cropPresetLabel(option))
                         }
                     }
                 }
@@ -193,6 +194,14 @@ internal fun CropEditorScreen(
             }
         }
     }
+}
+
+@Composable
+private fun cropPresetLabel(preset: CropPreset): String = when (preset) {
+    CropPreset.ORIGINAL -> stringResource(R.string.crop_original)
+    CropPreset.SQUARE -> "1:1"
+    CropPreset.FOUR_THREE -> "4:3"
+    CropPreset.THREE_FOUR -> "3:4"
 }
 
 @Composable

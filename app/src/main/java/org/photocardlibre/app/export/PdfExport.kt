@@ -9,6 +9,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
+import org.photocardlibre.app.R
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -110,7 +111,9 @@ object PdfExport {
     }
 
     fun open(context: Context, uri: Uri): Result<Unit> = runCatching {
-        context.startActivity(Intent.createChooser(createOpenIntent(uri), "Apri PDF"))
+        context.startActivity(
+            Intent.createChooser(createOpenIntent(uri), context.getString(R.string.pdf_open_chooser_title)),
+        )
     }
 
     fun createOpenIntent(uri: Uri): Intent =
@@ -141,11 +144,21 @@ object PdfExport {
     }
 
     fun share(context: Context, sourcePath: String): Result<Unit> = runCatching {
-        context.startActivity(Intent.createChooser(createShareIntent(context, sourcePath), "Condividi PDF"))
+        context.startActivity(
+            Intent.createChooser(
+                createShareIntent(context, sourcePath),
+                context.getString(R.string.pdf_share_chooser_title),
+            ),
+        )
     }
 
     fun share(context: Context, uri: Uri): Result<Unit> = runCatching {
-        context.startActivity(Intent.createChooser(createShareIntent(uri), "Condividi PDF"))
+        context.startActivity(
+            Intent.createChooser(
+                createShareIntent(uri),
+                context.getString(R.string.pdf_share_chooser_title),
+            ),
+        )
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)

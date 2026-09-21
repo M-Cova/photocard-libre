@@ -35,12 +35,24 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
+import org.junit.Before
 import org.junit.Test
+import org.photocardlibre.app.settings.AppLanguage
+import org.photocardlibre.app.settings.SettingsRepository
+import kotlinx.coroutines.runBlocking
 import java.io.File
 
 class CropEditorTest {
     @get:Rule
     val composeRule = createAndroidComposeRule<MainActivity>()
+
+    @Before
+    fun useItalian() {
+        runBlocking {
+            SettingsRepository(composeRule.activity).setAppLanguage(AppLanguage.ITALIAN)
+        }
+        composeRule.activityRule.scenario.recreate()
+    }
 
     @Test
     fun editPhotoOpensAFullScreenDestinationWithoutDialog() {
