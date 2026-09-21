@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="home_title">START</string>
     <string name="open_settings">Einstellungen öffnen</string>
     <string name="navigate_back">Zurück</string>
     <string name="action_add_photos">FOTOS HINZUFÜGEN</string>
-    <string name="action_preview">VORSCHAU</string>
+    <string name="action_preview">PDF-VORSCHAU</string>
     <string name="action_create_pdf">PDF ERSTELLEN</string>
-    <string name="empty_album_hint">Tippe auf FOTOS HINZUFÜGEN, um zu beginnen.</string>
     <plurals name="photo_count">
         <item quantity="one">%1$d Foto</item>
         <item quantity="other">%1$d Fotos</item>
@@ -14,10 +12,8 @@
     <string name="selected_photo_heading">AUSGEWÄHLTES FOTO</string>
     <string name="selected_photo_description">Ausgewähltes Foto</string>
     <string name="photo_thumbnail_description">Vorschaubild von %1$s</string>
-    <string name="edit_photo">FOTO BEARBEITEN</string>
+    <string name="aspect_ratio">SEITENVERHÄLTNIS</string>
     <string name="caption_label">BESCHRIFTUNG</string><string name="caption_support">Bis zu 4 Wörter</string>
-    <string name="move_before">DAVOR</string>
-    <string name="move_after">DANACH</string>
     <string name="delete">LÖSCHEN</string>
     <string name="image_unavailable">Bild nicht verfügbar</string>
     <string name="crop_editor_title">FOTO BEARBEITEN</string>
@@ -26,7 +22,6 @@
     <string name="preview_a4_title">A4-VORSCHAU</string>
     <string name="preview_page_description">Vorschau von Seite %1$d</string>
     <string name="page_position">Seite %1$d von %2$d</string>
-    <string name="close">SCHLIESSEN</string>
     <string name="pdf_name_title">PDF-DATEINAME</string>
     <string name="file_name_label">DATEINAME</string>
     <string name="cancel">ABBRECHEN</string>
@@ -80,4 +75,20 @@
     <string name="privacy_description">Fotos werden lokal auf dem Gerät verarbeitet und nicht an externe Server gesendet.</string>
     <string name="credits_label">Mitwirkende</string>
     <string name="value_to_be_defined">Noch festzulegen</string>
+    <string name="album_heading">Album</string>
+    <string name="empty_album_title">Dein Album beginnt hier</string>
+    <string name="photo_detail_title">Foto</string>
+    <string name="photo_position">Foto %1$d von %2$d</string>
+    <string name="reorder_heading">Reihenfolge im Album</string>
+    <string name="done">FERTIG</string>
+    <string name="pdf_ready_title">PDF bereit</string>
+    <string name="back_to_album">ZUM ALBUM</string>
+    <string name="album_tap_to_edit">Tippe auf ein Foto, um es zu bearbeiten.</string>
+    <string name="move_before_target">An Position %1$d verschieben, vor %2$s</string>
+    <string name="move_after_target">An Position %1$d verschieben, nach %2$s</string>
+    <string name="album_reorder_hint">Mit den Pfeilen unter jedem Foto ändern Sie die Reihenfolge.</string>
+    <string name="move_before_short">Vorher</string>
+    <string name="move_after_short">Nachher</string>
+    <string name="delete_photo_confirmation_title">Dieses Foto löschen?</string>
+    <string name="delete_photo_confirmation_message">„%1$s“ wird aus dem Album entfernt.</string>
 </resources>

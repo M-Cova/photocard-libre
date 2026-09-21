@@ -152,8 +152,8 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    fun move(offset: Int) {
-        val moved = state.album.moveSelected(offset)
+    fun move(id: String, offset: Int) {
+        val moved = state.album.move(id, offset)
         if (moved == state.album) return
         state = state.copy(
             album = moved, pdfPath = null, savedPdfUri = null,

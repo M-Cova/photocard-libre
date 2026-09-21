@@ -1,11 +1,11 @@
 package org.photocardlibre.app
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
@@ -20,6 +20,7 @@ import org.junit.Before
 import org.junit.Test
 import org.photocardlibre.app.ui.SavedPdfActions
 import org.photocardlibre.app.ui.PdfNameDialog
+import org.photocardlibre.app.ui.AlbumGallery
 import org.photocardlibre.app.ui.SelectedPhotoEditor
 import org.photocardlibre.app.model.PhotoEntry
 import org.junit.Assert.assertEquals
@@ -40,12 +41,37 @@ class MainScreenTest {
     }
 
     @Test
-    fun mainActionsAreVisible() {
+    fun emptyAlbumHasOneClearStartingAction() {
         composeRule.onNodeWithText("PhotoCard Libre").assertIsDisplayed()
+        composeRule.onNodeWithText("Your album starts here").assertIsDisplayed()
         composeRule.onNodeWithText("ADD PHOTOS").assertIsDisplayed()
-        composeRule.onNodeWithText("PREVIEW").assertIsDisplayed()
-        composeRule.onNodeWithText("CREATE PDF").assertIsDisplayed()
-        composeRule.onNodeWithTag("azioni_principali").assertIsDisplayed()
+        composeRule.onNodeWithText("PREVIEW PDF").assertDoesNotExist()
+        composeRule.onNodeWithText("CREATE PDF").assertDoesNotExist()
+        composeRule.onNodeWithTag("album_vuoto").assertIsDisplayed()
+    }
+
+    @Test
+    fun populatedAlbumExplainsPhotoEditingAndNamesPdfPreview() {
+        var selectedId: String? = null
+        composeRule.setContent {
+            MaterialTheme {
+                AlbumGallery(
+                    photos = listOf(PhotoEntry("first", "/missing-photo.jpg", "First")),
+                    message = null,
+                    onAdd = {},
+                    onSettings = {},
+                    onPhoto = { selectedId = it },
+                    onMove = { _, _ -> },
+                    onPreview = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Tap a photo to edit it.").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Selected photo").assertDoesNotExist()
+        composeRule.onNodeWithText("PREVIEW PDF").assertIsDisplayed()
+        composeRule.onNodeWithTag("foto_first").performClick()
+        composeRule.runOnIdle { assertEquals("first", selectedId) }
     }
 
     @Test
@@ -72,24 +98,61 @@ class MainScreenTest {
     }
 
     @Test
-    fun reorderButtonsShowWhenASelectedPhotoCanMove() {
+    fun albumReorderButtonsMoveTheirOwnPhotoWithoutOpeningEditor() {
+        var photos by mutableStateOf(listOf(
+            PhotoEntry("first", "/missing-photo.jpg", "First"),
+            PhotoEntry("second", "/missing-photo.jpg", "Second"),
+        ))
+        var openedPhoto: String? = null
+        composeRule.setContent {
+            MaterialTheme {
+                AlbumGallery(
+                    photos = photos,
+                    message = null,
+                    onAdd = {},
+                    onSettings = {},
+                    onPhoto = { openedPhoto = it },
+                    onMove = { id, offset ->
+                        photos = org.photocardlibre.app.model.AlbumState(photos)
+                            .move(id, offset).photos
+                    },
+                    onPreview = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Order in album").assertIsDisplayed()
+        composeRule.onNodeWithTag("sposta_first_prima").assertIsNotEnabled()
+        composeRule.onNodeWithTag("sposta_first_dopo").performClick()
+        composeRule.runOnIdle {
+            assertEquals(listOf("second", "first"), photos.map { it.id })
+            assertEquals(null, openedPhoto)
+        }
+    }
+
+    @Test
+    fun deletingPhotoRequiresExplicitConfirmation() {
+        var deleteCount = 0
         composeRule.setContent {
             MaterialTheme {
                 SelectedPhotoEditor(
-                    photo = PhotoEntry("first", "/missing-photo.jpg", "First"),
-                    canMoveBefore = false,
-                    canMoveAfter = true,
+                    photo = PhotoEntry("first", "/missing-photo.jpg", "First.jpg"),
                     onCaptionChange = {},
-                    onMoveBefore = {},
-                    onMoveAfter = {},
-                    onDelete = {},
+                    onDelete = { deleteCount++ },
                     onEdit = {},
                 )
             }
         }
 
-        composeRule.onNodeWithText("BEFORE").assertIsNotEnabled()
-        composeRule.onNodeWithText("AFTER").assertIsEnabled()
+        composeRule.onNodeWithTag("elimina_foto").performClick()
+        composeRule.onNodeWithText("Delete this photo?").assertIsDisplayed()
+        composeRule.runOnIdle { assertEquals(0, deleteCount) }
+        composeRule.onNodeWithTag("annulla_elimina_foto").performClick()
+        composeRule.runOnIdle { assertEquals(0, deleteCount) }
+
+        composeRule.onNodeWithTag("elimina_foto").performClick()
+        composeRule.onNodeWithTag("conferma_elimina_foto").performClick()
+        composeRule.runOnIdle { assertEquals(1, deleteCount) }
     }
 
     @Test

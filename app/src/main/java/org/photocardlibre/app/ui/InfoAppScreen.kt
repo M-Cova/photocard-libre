@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -45,14 +47,20 @@ internal fun InfoAppScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(vertical = 12.dp),
         ) {
-            PhotoCardWordmark(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-            )
-            Text(
-                text = stringResource(R.string.app_description),
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-            )
+            Surface(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.primaryContainer,
+            ) {
+                Column(Modifier.padding(24.dp)) {
+                    PhotoCardWordmark()
+                    androidx.compose.foundation.layout.Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(R.string.app_description),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            }
             Text(
                 text = stringResource(R.string.open_source_description),
                 style = MaterialTheme.typography.bodyLarge,

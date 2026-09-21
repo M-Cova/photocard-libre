@@ -71,7 +71,7 @@ class SettingsNavigationTest {
         openSettings()
         pressSystemBack()
         composeRule.onNodeWithText("PhotoCard Libre").assertIsDisplayed()
-        composeRule.onNodeWithTag("azioni_principali").assertIsDisplayed()
+        composeRule.onNodeWithTag("album_vuoto").assertIsDisplayed()
     }
 
     @Test

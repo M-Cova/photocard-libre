@@ -66,8 +66,6 @@ class CropEditorTest {
                     SelectedPhotoEditor(
                         photo = photo,
                         onCaptionChange = {},
-                        onMoveBefore = {},
-                        onMoveAfter = {},
                         onDelete = {},
                         onEdit = { editorVisible = true },
                     )
@@ -75,7 +73,7 @@ class CropEditorTest {
             }
         }
 
-        composeRule.onNodeWithText("MODIFICA FOTO").performClick()
+        composeRule.onNodeWithText("ASPETTO").performClick()
         composeRule.onNodeWithTag("editor_crop").assertIsDisplayed()
         composeRule.onNodeWithText("CONFERMA").assertIsDisplayed().assertHasClickAction()
         assertTrue(composeRule.onAllNodes(isDialog()).fetchSemanticsNodes().isEmpty())

@@ -19,7 +19,7 @@ data class AlbumState(
 
     fun add(newPhotos: List<PhotoEntry>): AlbumState {
         if (newPhotos.isEmpty()) return this
-        return copy(photos = photos + newPhotos, selectedId = newPhotos.last().id)
+        return copy(photos = photos + newPhotos)
     }
 
     fun select(id: String): AlbumState =
@@ -35,8 +35,8 @@ data class AlbumState(
         return CaptionChange(copy(photos = updated), null)
     }
 
-    fun moveSelected(offset: Int): AlbumState {
-        val current = photos.indexOfFirst { it.id == selectedId }
+    fun move(id: String, offset: Int): AlbumState {
+        val current = photos.indexOfFirst { it.id == id }
         if (current < 0) return this
         val target = (current + offset).coerceIn(0, photos.lastIndex)
         if (target == current) return this

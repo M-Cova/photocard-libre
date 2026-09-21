@@ -90,7 +90,7 @@ internal fun CropEditorScreen(
             .imePadding()
             .testTag("editor_crop"),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.crop_editor_title)) },
@@ -149,32 +149,6 @@ internal fun CropEditorScreen(
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(CropPreset.entries) { option ->
-                    FilterChip(
-                        selected = option == preset,
-                        onClick = {
-                            if (option != preset) {
-                                preset = option
-                                workingCrop = option.defaultRect(bitmap.width, bitmap.height)
-                            }
-                        },
-                        label = { Text(cropPresetLabel(option)) },
-                        leadingIcon = if (option == preset) {
-                            {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_check_circle),
-                                    contentDescription = null,
-                                    modifier = Modifier.width(18.dp).height(18.dp),
-                                )
-                            }
-                        } else null,
-                    )
-                }
-            }
             BoxWithConstraints(
                 modifier = Modifier.fillMaxWidth().weight(1f),
                 contentAlignment = Alignment.Center,
@@ -200,6 +174,32 @@ internal fun CropEditorScreen(
                     onCropChange = { workingCrop = it },
                     modifier = Modifier.width(frameWidth).height(frameHeight),
                 )
+            }
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(CropPreset.entries) { option ->
+                    FilterChip(
+                        selected = option == preset,
+                        onClick = {
+                            if (option != preset) {
+                                preset = option
+                                workingCrop = option.defaultRect(bitmap.width, bitmap.height)
+                            }
+                        },
+                        label = { Text(cropPresetLabel(option)) },
+                        leadingIcon = if (option == preset) {
+                            {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_check_circle),
+                                    contentDescription = null,
+                                    modifier = Modifier.width(18.dp).height(18.dp),
+                                )
+                            }
+                        } else null,
+                    )
+                }
             }
         }
     }

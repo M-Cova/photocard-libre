@@ -13,9 +13,11 @@ class AlbumStateTest {
     @Test
     fun addSelectMoveAndDeleteKeepDeterministicOrder() {
         var state = AlbumState().add(listOf(first, second, third))
-        assertEquals("3", state.selectedId)
-        state = state.moveSelected(-1)
+        assertNull(state.selectedId)
+        state = state.move("3", -1)
         assertEquals(listOf("1", "3", "2"), state.photos.map { it.id })
+        assertNull(state.selectedId)
+        state = state.select("3")
         val deleted = state.deleteSelected()
         assertEquals("3", deleted.removed?.id)
         assertEquals(listOf("1", "2"), deleted.state.photos.map { it.id })
@@ -24,7 +26,7 @@ class AlbumStateTest {
 
     @Test
     fun captionIsUppercaseAndLimitedToFourWords() {
-        val state = AlbumState().add(listOf(first))
+        val state = AlbumState().add(listOf(first)).select("1")
         val accepted = state.updateCaption("  al   mare oggi ")
         assertNull(accepted.error)
         assertEquals("AL MARE OGGI ", accepted.state.selectedPhoto?.caption)
@@ -38,7 +40,7 @@ class AlbumStateTest {
     fun cropFollowsPhotoDuringReorderAndDisappearsWithDeletedPhoto() {
         val crop = CropRect(0.1, 0.2, 0.8, 0.6)
         var state = AlbumState().add(listOf(first, second)).select("1")
-        state = state.updateSelectedCrop(crop).moveSelected(1)
+        state = state.updateSelectedCrop(crop).move("1", 1)
 
         assertEquals(listOf("2", "1"), state.photos.map { it.id })
         assertEquals(crop, state.photos.last().crop)

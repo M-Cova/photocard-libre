@@ -13,18 +13,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 
-private val PhotoCardBlue = Color(0xFF1769C2)
-private val PhotoCardBlueDark = Color(0xFF08265C)
-private val PhotoCardBlueLight = Color(0xFFDDEBFF)
-private val PhotoCardGreen = Color(0xFF2E7D4F)
-private val PhotoCardGreenDark = Color(0xFF125B32)
-private val PhotoCardGreenLight = Color(0xFFE2F4E9)
-private val PhotoCardBackground = Color(0xFFF7FAFD)
+private val PhotoCardBlue = Color(0xFF165DA4)
+private val PhotoCardBlueDark = Color(0xFF10365E)
+private val PhotoCardBlueLight = Color(0xFFDCEEFF)
+private val PhotoCardGreen = Color(0xFF237954)
+private val PhotoCardGreenDark = Color(0xFF164B37)
+private val PhotoCardGreenLight = Color(0xFFDCEFE4)
+private val PhotoCardBackground = Color(0xFFF5F9FC)
 private val PhotoCardSurface = Color(0xFFFFFFFF)
-private val PhotoCardSurfaceSoft = Color(0xFFF1F6FB)
+private val PhotoCardSurfaceSoft = Color(0xFFEAF3F7)
 private val PhotoCardText = Color(0xFF152238)
 private val PhotoCardTextSecondary = Color(0xFF526176)
-private val PhotoCardOutline = Color(0xFF9BB7D8)
+private val PhotoCardOutline = Color(0xFF91AABB)
 private val PhotoCardError = Color(0xFFBA1A1A)
 
 private val PhotoCardColorScheme = lightColorScheme(
@@ -90,7 +90,6 @@ private val PhotoCardShapes = Shapes(
 
 @Composable
 fun PhotoCardLibreTheme(content: @Composable () -> Unit) {
-    // PhotoCard Libre uses one high-contrast light identity, matching its print workflow.
     MaterialTheme(
         colorScheme = PhotoCardColorScheme,
         typography = PhotoCardTypography,

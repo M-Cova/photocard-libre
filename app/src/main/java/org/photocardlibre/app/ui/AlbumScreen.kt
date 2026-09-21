@@ -9,100 +9,62 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed as gridItemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.photocardlibre.app.AlbumViewModel
 import org.photocardlibre.app.R
 import org.photocardlibre.app.export.AutomaticSaveResult
 import org.photocardlibre.app.export.PdfExport
-import org.photocardlibre.app.model.PhotoEntry
 import org.photocardlibre.app.model.CropRect
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import org.photocardlibre.app.model.PhotoEntry
 import java.util.Locale
+
+private enum class AppDestination { ALBUM, SETTINGS, INFO, LANGUAGE }
+private enum class WorkspacePage { ALBUM, PHOTO, PREVIEW, RESULT }
 
 @Composable
 fun AlbumScreen(viewModel: AlbumViewModel) {
-    var destination by rememberSaveable { mutableStateOf(AppDestination.HOME) }
+    var destination by rememberSaveable { mutableStateOf(AppDestination.ALBUM) }
     val activity = LocalActivity.current
-
-    BackHandler(enabled = destination != AppDestination.HOME) {
+    BackHandler(enabled = destination != AppDestination.ALBUM) {
         destination = when (destination) {
-            AppDestination.INFO -> AppDestination.SETTINGS
-            AppDestination.LANGUAGE -> AppDestination.SETTINGS
-            AppDestination.SETTINGS -> AppDestination.HOME
-            AppDestination.HOME -> AppDestination.HOME
+            AppDestination.INFO, AppDestination.LANGUAGE -> AppDestination.SETTINGS
+            else -> AppDestination.ALBUM
         }
     }
-
     when (destination) {
-        AppDestination.HOME -> AlbumHomeScreen(
-            viewModel = viewModel,
-            onOpenSettings = { destination = AppDestination.SETTINGS },
-        )
+        AppDestination.ALBUM -> AlbumWorkspace(viewModel) { destination = AppDestination.SETTINGS }
         AppDestination.SETTINGS -> SettingsScreen(
             selectedLanguage = viewModel.state.appLanguage,
             onOpenLanguage = { destination = AppDestination.LANGUAGE },
@@ -110,47 +72,36 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
             onImageSizeSelected = viewModel::selectPdfImageSize,
             selectedCaptionSize = viewModel.state.pdfCaptionSize,
             onCaptionSizeSelected = viewModel::selectPdfCaptionSize,
-            onBack = { destination = AppDestination.HOME },
+            onBack = { destination = AppDestination.ALBUM },
             onOpenInfo = { destination = AppDestination.INFO },
         )
-        AppDestination.INFO -> InfoAppScreen(
-            onBack = { destination = AppDestination.SETTINGS },
-        )
+        AppDestination.INFO -> InfoAppScreen(onBack = { destination = AppDestination.SETTINGS })
         AppDestination.LANGUAGE -> LanguageScreen(
             selectedLanguage = viewModel.state.appLanguage,
-            onLanguageSelected = { language ->
-                viewModel.selectAppLanguage(language) { activity?.recreate() }
-            },
+            onLanguageSelected = { viewModel.selectAppLanguage(it) { activity?.recreate() } },
             onBack = { destination = AppDestination.SETTINGS },
         )
     }
 }
 
-private enum class AppDestination {
-    HOME,
-    SETTINGS,
-    INFO,
-    LANGUAGE,
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AlbumHomeScreen(
-    viewModel: AlbumViewModel,
-    onOpenSettings: () -> Unit,
-) {
+private fun AlbumWorkspace(viewModel: AlbumViewModel, onOpenSettings: () -> Unit) {
     val state = viewModel.state
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var page by rememberSaveable { mutableStateOf(WorkspacePage.ALBUM) }
+    var cropPhotoId by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingSafSource by rememberSaveable { mutableStateOf<String?>(null) }
-    var handledPdfGenerationId by rememberSaveable { mutableLongStateOf(0L) }
-    var editingPhotoId by rememberSaveable { mutableStateOf<String?>(null) }
+    var handledPdfGenerationId by rememberSaveable { mutableLongStateOf(state.pdfGenerationId) }
+    var handledSavedUri by rememberSaveable { mutableStateOf(state.savedPdfUri) }
     var pendingPdfName by rememberSaveable { mutableStateOf<String?>(null) }
     var pdfNameError by rememberSaveable { mutableStateOf<String?>(null) }
+
     val photoPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(maxItems = 50),
-    ) { uris ->
-        viewModel.importUris(uris, context.getString(R.string.default_photo_name))
+    ) { uris -> viewModel.importUris(uris, context.getString(R.string.default_photo_name)) }
+    val addPhotos = {
+        photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
     val savePdf = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/pdf"),
@@ -158,20 +109,14 @@ private fun AlbumHomeScreen(
         val source = pendingSafSource
         pendingSafSource = null
         if (destination == null || source == null) {
-            if (destination == null) viewModel.onPdfSaveCancelled()
-            else viewModel.onPdfSaveFailed()
+            if (destination == null) viewModel.onPdfSaveCancelled() else viewModel.onPdfSaveFailed()
         } else {
             scope.launch {
-                val result = withContext(Dispatchers.IO) {
-                    PdfExport.save(context, source, destination)
-                }
+                val result = withContext(Dispatchers.IO) { PdfExport.save(context, source, destination) }
                 if (result.isSuccess) viewModel.onPdfSaved(destination, inDownloads = false)
                 else viewModel.onPdfSaveFailed()
             }
         }
-    }
-    val addPhotos = {
-        photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
     val saveGeneratedPdf: (String, String) -> Unit = { source, fileName ->
         scope.launch {
@@ -181,9 +126,7 @@ private fun AlbumHomeScreen(
             result.fold(
                 onSuccess = { saved ->
                     when (saved) {
-                        is AutomaticSaveResult.Saved -> {
-                            viewModel.onPdfSaved(saved.uri, inDownloads = true)
-                        }
+                        is AutomaticSaveResult.Saved -> viewModel.onPdfSaved(saved.uri, inDownloads = true)
                         AutomaticSaveResult.UseDocumentPicker -> {
                             pendingSafSource = source
                             savePdf.launch(fileName)
@@ -195,248 +138,89 @@ private fun AlbumHomeScreen(
         }
     }
 
+    LaunchedEffect(state.previewVisible) {
+        if (state.previewVisible) page = WorkspacePage.PREVIEW
+    }
     LaunchedEffect(state.pdfGenerationId) {
-        if (state.pdfGenerationId == 0L || state.pdfGenerationId == handledPdfGenerationId) {
-            return@LaunchedEffect
+        if (state.pdfGenerationId != 0L && state.pdfGenerationId != handledPdfGenerationId) {
+            handledPdfGenerationId = state.pdfGenerationId
+            if (state.pdfPath != null) {
+                pendingPdfName = PdfExport.automaticFileName()
+                pdfNameError = null
+            }
         }
-        handledPdfGenerationId = state.pdfGenerationId
-        if (state.pdfPath == null) return@LaunchedEffect
-        pendingPdfName = PdfExport.automaticFileName()
-        pdfNameError = null
+    }
+    LaunchedEffect(state.savedPdfUri) {
+        if (state.hasSavedPdfActions && state.savedPdfUri != handledSavedUri) {
+            handledSavedUri = state.savedPdfUri
+            page = WorkspacePage.RESULT
+        }
     }
 
-    val editingPhoto = editingPhotoId?.let { photoId ->
-        state.album.photos.firstOrNull { it.id == photoId }
-    }
-    if (editingPhoto != null) {
+    val cropPhoto = cropPhotoId?.let { id -> state.album.photos.firstOrNull { it.id == id } }
+    if (cropPhoto != null) {
         CropEditorScreen(
-            photo = editingPhoto,
-            onBack = { editingPhotoId = null },
+            photo = cropPhoto,
+            onBack = { cropPhotoId = null },
             onConfirm = { crop ->
-                viewModel.select(editingPhoto.id)
+                viewModel.select(cropPhoto.id)
                 viewModel.updateCrop(crop)
-                editingPhotoId = null
+                cropPhotoId = null
             },
         )
-        return
-    }
-
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.home_title)) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    actionIconContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                actions = {
-                    IconButton(
-                        onClick = onOpenSettings,
-                        modifier = Modifier.testTag("apri_impostazioni"),
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_settings),
-                            contentDescription = stringResource(R.string.open_settings),
-                        )
-                    }
+    } else {
+        BackHandler(enabled = page != WorkspacePage.ALBUM && pendingPdfName == null) {
+            if (page == WorkspacePage.PREVIEW) viewModel.closePreview()
+            page = WorkspacePage.ALBUM
+        }
+        when (page) {
+            WorkspacePage.ALBUM -> AlbumGallery(
+                photos = state.album.photos,
+                message = state.userMessage?.let { context.getString(it.resource, *it.formatArgs.toTypedArray()) },
+                onAdd = addPhotos,
+                onSettings = onOpenSettings,
+                onPhoto = { id -> viewModel.select(id); page = WorkspacePage.PHOTO },
+                onMove = viewModel::move,
+                onPreview = viewModel::preview,
+            )
+            WorkspacePage.PHOTO -> {
+                val selected = state.album.selectedPhoto
+                if (selected == null) {
+                    LaunchedEffect(Unit) { page = WorkspacePage.ALBUM }
+                } else {
+                    val selectedIndex = state.album.photos.indexOfFirst { it.id == selected.id }
+                    PhotoDetailScreen(
+                        photo = selected,
+                        position = selectedIndex + 1,
+                        total = state.album.photos.size,
+                        onBack = { page = WorkspacePage.ALBUM },
+                        onCaptionChange = viewModel::updateCaption,
+                        onCrop = { cropPhotoId = selected.id },
+                        onDelete = { viewModel.deleteSelected(); page = WorkspacePage.ALBUM },
+                        message = state.userMessage?.let { context.getString(it.resource, *it.formatArgs.toTypedArray()) },
+                    )
+                }
+            }
+            WorkspacePage.PREVIEW -> PreviewScreen(
+                paths = state.previewPaths,
+                onBack = { viewModel.closePreview(); page = WorkspacePage.ALBUM },
+                onCreatePdf = viewModel::createPdf,
+                saving = state.pdfSaving,
+                message = state.userMessage?.let { context.getString(it.resource, *it.formatArgs.toTypedArray()) },
+            )
+            WorkspacePage.RESULT -> PdfResultScreen(
+                pageCount = state.pdfPageCount,
+                message = state.userMessage?.let { context.getString(it.resource, *it.formatArgs.toTypedArray()) },
+                onBack = { viewModel.closePreview(); page = WorkspacePage.ALBUM },
+                onOpen = {
+                    val uri = state.savedPdfUri?.let(Uri::parse) ?: return@PdfResultScreen
+                    if (PdfExport.open(context, uri).isFailure) viewModel.showMessage(R.string.message_pdf_open_failed)
+                },
+                onShare = {
+                    val uri = state.savedPdfUri?.let(Uri::parse) ?: return@PdfResultScreen
+                    if (PdfExport.share(context, uri).isFailure) viewModel.showMessage(R.string.message_pdf_share_failed)
                 },
             )
-        },
-        bottomBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .background(MaterialTheme.colorScheme.surface),
-            ) {
-                state.userMessage?.let { message ->
-                    Text(
-                        stringResource(message.resource, *message.formatArgs.toTypedArray()),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 6.dp)
-                            .semantics { liveRegion = LiveRegionMode.Polite },
-                    )
-                }
-                if (state.hasSavedPdfActions) {
-                    val savedUri = Uri.parse(state.savedPdfUri)
-                    SavedPdfActions(
-                        onOpen = {
-                            val result = PdfExport.open(context, savedUri)
-                            if (result.isFailure) {
-                                viewModel.showMessage(R.string.message_pdf_open_failed)
-                            }
-                        },
-                        onShare = {
-                            val result = PdfExport.share(context, savedUri)
-                            if (result.isFailure) {
-                                viewModel.showMessage(R.string.message_pdf_share_failed)
-                            }
-                        },
-                    )
-                }
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 10.dp)
-                        .testTag("azioni_principali"),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    val hasPhotos = state.album.photos.isNotEmpty()
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        FilledTonalButton(
-                            onClick = addPhotos,
-                            modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-                        ) {
-                            Icon(painterResource(R.drawable.ic_add_photo), contentDescription = null,
-                                modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(6.dp))
-                            Text(stringResource(R.string.action_add_photos), maxLines = 2,
-                                textAlign = TextAlign.Center)
-                        }
-                        TextButton(
-                            onClick = viewModel::preview,
-                            enabled = hasPhotos,
-                            modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-                        ) {
-                            Icon(painterResource(R.drawable.ic_visibility), contentDescription = null,
-                                modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(6.dp))
-                            Text(stringResource(R.string.action_preview), maxLines = 2,
-                                textAlign = TextAlign.Center)
-                        }
-                    }
-                    Button(
-                        onClick = viewModel::createPdf,
-                        enabled = hasPhotos,
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-                    ) {
-                        Icon(painterResource(R.drawable.ic_picture_as_pdf), contentDescription = null,
-                            modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text(stringResource(R.string.action_create_pdf))
-                    }
-                }
-            }
-        },
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(top = 18.dp, bottom = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            item {
-                PhotoCardWordmark()
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    pluralStringResource(
-                        R.plurals.photo_count,
-                        state.album.photos.size,
-                        state.album.photos.size,
-                    ),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            if (state.album.photos.isEmpty()) {
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = MaterialTheme.shapes.large,
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)),
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 36.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                        ) {
-                            Icon(
-                                painterResource(R.drawable.ic_add_photo),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(40.dp),
-                            )
-                            Text(
-                                stringResource(R.string.empty_album_hint),
-                                style = MaterialTheme.typography.titleMedium,
-                                textAlign = TextAlign.Center,
-                            )
-                        }
-                    }
-                }
-            } else {
-                item {
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        contentPadding = PaddingValues(vertical = 2.dp),
-                    ) {
-                        items(state.album.photos.size) { index ->
-                            val photo = state.album.photos[index]
-                            PhotoThumbnail(
-                                photo = photo,
-                                selected = photo.id == state.album.selectedId,
-                                onClick = { viewModel.select(photo.id) },
-                                modifier = Modifier.width(132.dp),
-                            )
-                        }
-                    }
-                }
-            }
-            state.album.selectedPhoto?.let { selected ->
-                item {
-                    SelectedPhotoEditor(
-                        photo = selected,
-                        canMoveBefore = state.album.photos.first().id != selected.id,
-                        canMoveAfter = state.album.photos.last().id != selected.id,
-                        onCaptionChange = viewModel::updateCaption,
-                        onMoveBefore = { viewModel.move(-1) },
-                        onMoveAfter = { viewModel.move(1) },
-                        onDelete = viewModel::deleteSelected,
-                        onEdit = { editingPhotoId = selected.id },
-                    )
-                }
-            }
-            state.pdfPath?.let {
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = MaterialTheme.shapes.medium,
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                        ),
-                        border = BorderStroke(
-                            1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.45f),
-                        ),
-                    ) {
-                        Column(
-                            Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            Text(
-                                pluralStringResource(
-                                    R.plurals.pdf_ready,
-                                    state.pdfPageCount,
-                                    state.pdfPageCount,
-                                ),
-                                fontWeight = FontWeight.Bold,
-                            )
-                            if (state.pdfSaving) {
-                                Text(stringResource(R.string.pdf_saving))
-                            }
-                        }
-                    }
-                }
-            }
-            item { Spacer(Modifier.height(8.dp)) }
         }
     }
 
@@ -445,24 +229,14 @@ private fun AlbumHomeScreen(
             onDismissRequest = {},
             confirmButton = {},
             title = { Text(stringResource(state.busyMessage)) },
-            text = {
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            },
+            text = { Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator() } },
         )
-    }
-    if (state.previewVisible) {
-        PreviewDialog(state.previewPaths, viewModel::closePreview)
     }
     pendingPdfName?.let { proposedName ->
         PdfNameDialog(
             name = proposedName,
             error = pdfNameError,
-            onNameChange = {
-                pendingPdfName = it
-                pdfNameError = null
-            },
+            onNameChange = { pendingPdfName = it; pdfNameError = null },
             onCancel = {
                 pendingPdfName = null
                 pdfNameError = null
@@ -486,199 +260,406 @@ private fun AlbumHomeScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun PdfNameDialog(
-    name: String,
-    error: String?,
-    onNameChange: (String) -> Unit,
-    onCancel: () -> Unit,
-    onSave: () -> Unit,
+internal fun AlbumGallery(
+    photos: List<PhotoEntry>, message: String?,
+    onAdd: () -> Unit, onSettings: () -> Unit, onPhoto: (String) -> Unit,
+    onMove: (String, Int) -> Unit, onPreview: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onCancel,
-        title = { Text(stringResource(R.string.pdf_name_title)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = onNameChange,
-                    singleLine = true,
-                    label = { Text(stringResource(R.string.file_name_label)) },
-                    isError = error != null,
-                    modifier = Modifier.fillMaxWidth().testTag("nome_file_pdf"),
-                )
-                error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    val hasPhotos = photos.isNotEmpty()
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            TopAppBar(
+                title = { PhotoCardWordmark(style = MaterialTheme.typography.titleLarge) },
+                actions = {
+                    IconButton(onClick = onSettings, modifier = Modifier.testTag("apri_impostazioni")) {
+                        Icon(painterResource(R.drawable.ic_settings), stringResource(R.string.open_settings))
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
+            )
+        },
+        bottomBar = {
+            if (hasPhotos) {
+                Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 4.dp) {
+                    Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp)) {
+                        Button(onClick = onPreview, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("anteprima_album")) {
+                            Icon(painterResource(R.drawable.ic_visibility), null)
+                            Spacer(Modifier.width(10.dp))
+                            Text(stringResource(R.string.action_preview))
+                        }
+                    }
+                }
             }
         },
-        dismissButton = {
-            TextButton(onClick = onCancel) { Text(stringResource(R.string.cancel)) }
-        },
-        confirmButton = { Button(onClick = onSave) { Text(stringResource(R.string.save)) } },
-    )
-}
-
-@Composable
-internal fun SavedPdfActions(onOpen: () -> Unit, onShare: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 8.dp, end = 8.dp, top = 8.dp)
-            .testTag("azioni_pdf_salvato"),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        TextButton(onClick = onOpen, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-            Text(stringResource(R.string.open_pdf))
-        }
-        TextButton(onClick = onShare, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-            Text(stringResource(R.string.share_pdf))
+    ) { insets ->
+        if (!hasPhotos) {
+            Column(
+                Modifier.fillMaxSize().padding(insets).verticalScroll(androidx.compose.foundation.rememberScrollState())
+                    .padding(24.dp).testTag("album_vuoto"),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Box(
+                    Modifier.size(144.dp).clip(MaterialTheme.shapes.large)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(painterResource(R.drawable.ic_add_photo), null,
+                        Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
+                }
+                Spacer(Modifier.height(28.dp))
+                Text(stringResource(R.string.empty_album_title), style = MaterialTheme.typography.headlineLarge,
+                    textAlign = TextAlign.Center)
+                Spacer(Modifier.height(10.dp))
+                Text(stringResource(R.string.app_description), style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(28.dp))
+                Button(onClick = onAdd, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("aggiungi_foto")) {
+                    Icon(painterResource(R.drawable.ic_add_photo), null)
+                    Spacer(Modifier.width(10.dp))
+                    Text(stringResource(R.string.action_add_photos))
+                }
+                MessageText(message)
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 148.dp),
+                modifier = Modifier.fillMaxSize().padding(insets).testTag("griglia_album"),
+                contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 28.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Column {
+                        Text(stringResource(R.string.album_heading), style = MaterialTheme.typography.headlineLarge)
+                        Spacer(Modifier.height(4.dp))
+                        Text(pluralStringResource(R.plurals.photo_count, photos.size, photos.size),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(Modifier.height(10.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Icon(painterResource(R.drawable.ic_edit), null, Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.secondary)
+                            Text(stringResource(R.string.album_tap_to_edit),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyMedium)
+                        }
+                        if (photos.size > 1) {
+                            Spacer(Modifier.height(10.dp))
+                            Text(stringResource(R.string.reorder_heading),
+                                style = MaterialTheme.typography.titleMedium)
+                            Text(stringResource(R.string.album_reorder_hint),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyMedium)
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        FilledTonalButton(onClick = onAdd, modifier = Modifier.heightIn(min = 48.dp).testTag("aggiungi_foto")) {
+                            Icon(painterResource(R.drawable.ic_add_photo), null)
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.action_add_photos))
+                        }
+                        MessageText(message)
+                    }
+                }
+                gridItemsIndexed(photos, key = { _, photo -> photo.id }) { index, photo ->
+                    AlbumTile(
+                        photo = photo,
+                        position = index + 1,
+                        total = photos.size,
+                        previousPhoto = photos.getOrNull(index - 1),
+                        nextPhoto = photos.getOrNull(index + 1),
+                        onClick = { onPhoto(photo.id) },
+                        onMoveBefore = { onMove(photo.id, -1) },
+                        onMoveAfter = { onMove(photo.id, 1) },
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun PhotoThumbnail(photo: PhotoEntry, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun AlbumTile(
+    photo: PhotoEntry, position: Int, total: Int,
+    previousPhoto: PhotoEntry?, nextPhoto: PhotoEntry?,
+    onClick: () -> Unit, onMoveBefore: () -> Unit, onMoveAfter: () -> Unit,
+) {
+    val beforeDescription = previousPhoto?.let {
+        stringResource(R.string.move_before_target, position - 1, it.caption.ifBlank { it.displayName })
+    } ?: stringResource(R.string.move_before_short)
+    val afterDescription = nextPhoto?.let {
+        stringResource(R.string.move_after_target, position + 1, it.caption.ifBlank { it.displayName })
+    } ?: stringResource(R.string.move_after_short)
     Card(
         onClick = onClick,
-        modifier = modifier.semantics { this.selected = selected },
+        modifier = Modifier.fillMaxWidth().testTag("foto_${photo.id}"),
         shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
-            else MaterialTheme.colorScheme.surface,
-        ),
-        border = if (selected) {
-            BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-        } else {
-            BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.45f))
-        },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.28f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
-        Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Box {
-                LocalImage(
-                    photo.localPath,
-                    Modifier.fillMaxWidth().aspectRatio(4f / 3f),
-                    stringResource(R.string.photo_thumbnail_description, photo.displayName),
-                    photo.crop,
-                    maximumSide = 512,
-                )
-                if (selected) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_check_circle),
-                        contentDescription = stringResource(R.string.selected_photo_description),
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(4.dp)
-                            .background(MaterialTheme.colorScheme.surface, CircleShape),
-                    )
+        Column {
+            Box(Modifier.fillMaxWidth().aspectRatio(1f).background(MaterialTheme.colorScheme.surfaceVariant)) {
+                LocalImage(photo.localPath, Modifier.fillMaxSize(),
+                    stringResource(R.string.photo_thumbnail_description, photo.displayName), photo.crop, 512)
+                Surface(Modifier.align(Alignment.TopStart).padding(8.dp), shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surface) {
+                    Text(position.toString(), Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        style = MaterialTheme.typography.labelMedium)
                 }
             }
-            Text(
-                photo.caption.uppercase(Locale.ROOT),
-                maxLines = 2,
-                minLines = 2,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = if (selected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(photo.caption.ifBlank { photo.displayName }.uppercase(Locale.ROOT),
+                    Modifier.weight(1f), style = MaterialTheme.typography.labelLarge,
+                    maxLines = 2, minLines = 2, textAlign = TextAlign.Center)
+                Icon(painterResource(R.drawable.ic_edit), null, Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.secondary)
+            }
+            if (total > 1) {
+                HorizontalDivider()
+                Row(Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly) {
+                    IconButton(onClick = onMoveBefore, enabled = previousPhoto != null,
+                        modifier = Modifier.size(48.dp)
+                            .testTag("sposta_${photo.id}_prima")
+                            .semantics { contentDescription = beforeDescription }) {
+                        Icon(painterResource(R.drawable.ic_arrow_back), null)
+                    }
+                    IconButton(onClick = onMoveAfter, enabled = nextPhoto != null,
+                        modifier = Modifier.size(48.dp)
+                            .testTag("sposta_${photo.id}_dopo")
+                            .semantics { contentDescription = afterDescription }) {
+                        Icon(painterResource(R.drawable.ic_arrow_forward), null)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PhotoDetailScreen(
+    photo: PhotoEntry, position: Int, total: Int,
+    onBack: () -> Unit, onCaptionChange: (String) -> Unit,
+    onCrop: () -> Unit, onDelete: () -> Unit, message: String?,
+) {
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = { WorkspaceTopBar(photo.caption.ifBlank { photo.displayName }, onBack) },
+        bottomBar = {
+            Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 4.dp) {
+                Button(onClick = onBack, Modifier.fillMaxWidth().navigationBarsPadding()
+                    .padding(16.dp).heightIn(min = 56.dp)) { Text(stringResource(R.string.done)) }
+            }
+        },
+    ) { insets ->
+        Column(Modifier.fillMaxSize().padding(insets).verticalScroll(androidx.compose.foundation.rememberScrollState())
+            .padding(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+            Text(stringResource(R.string.photo_position, position, total),
+                style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.secondary)
+            LocalImage(photo.localPath, Modifier.fillMaxWidth().heightIn(min = 200.dp).aspectRatio(4f / 3f)
+                .clip(MaterialTheme.shapes.large).background(MaterialTheme.colorScheme.surfaceVariant),
+                stringResource(R.string.selected_photo_description), photo.crop)
+            SelectedPhotoEditor(photo, onCaptionChange, onDelete, onCrop)
+            MessageText(message)
         }
     }
 }
 
 @Composable
 internal fun SelectedPhotoEditor(
-    photo: PhotoEntry,
-    canMoveBefore: Boolean = true,
-    canMoveAfter: Boolean = true,
-    onCaptionChange: (String) -> Unit,
-    onMoveBefore: () -> Unit,
-    onMoveAfter: () -> Unit,
-    onDelete: () -> Unit,
-    onEdit: () -> Unit,
+    photo: PhotoEntry, onCaptionChange: (String) -> Unit,
+    onDelete: () -> Unit, onEdit: () -> Unit,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.45f)),
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(
-                stringResource(R.string.selected_photo_heading),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-            LocalImage(
-                photo.localPath,
-                Modifier.fillMaxWidth().aspectRatio(16f / 9f),
-                stringResource(R.string.selected_photo_description),
-                photo.crop,
-            )
-            FilledTonalButton(
-                onClick = onEdit,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-            ) {
-                Icon(
-                    painterResource(R.drawable.ic_edit),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.edit_photo))
+    var confirmDeletion by rememberSaveable { mutableStateOf(false) }
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        OutlinedTextField(
+            value = photo.caption, onValueChange = onCaptionChange,
+            label = { Text(stringResource(R.string.caption_label)) },
+            supportingText = { Text(stringResource(R.string.caption_support)) },
+            singleLine = true, modifier = Modifier.fillMaxWidth().testTag("didascalia_foto"),
+        )
+        FilledTonalButton(onClick = onEdit, Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
+            Icon(painterResource(R.drawable.ic_edit), null)
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.aspect_ratio))
+        }
+        TextButton(onClick = { confirmDeletion = true },
+            modifier = Modifier.align(Alignment.End).heightIn(min = 48.dp).testTag("elimina_foto")) {
+            Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+        }
+    }
+    if (confirmDeletion) {
+        AlertDialog(
+            onDismissRequest = { confirmDeletion = false },
+            title = { Text(stringResource(R.string.delete_photo_confirmation_title)) },
+            text = { Text(stringResource(R.string.delete_photo_confirmation_message,
+                photo.caption.ifBlank { photo.displayName })) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmDeletion = false
+                    onDelete()
+                }, modifier = Modifier.testTag("conferma_elimina_foto")) {
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDeletion = false },
+                    modifier = Modifier.testTag("annulla_elimina_foto")) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PreviewScreen(paths: List<String>, onBack: () -> Unit, onCreatePdf: () -> Unit,
+    saving: Boolean, message: String?) {
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        topBar = { WorkspaceTopBar(stringResource(R.string.preview_a4_title), onBack,
+            MaterialTheme.colorScheme.surfaceVariant) },
+        bottomBar = {
+            Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 4.dp) {
+                Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp)) {
+                    MessageText(message)
+                    if (saving) {
+                        Text(stringResource(R.string.pdf_saving), modifier = Modifier.fillMaxWidth()
+                            .padding(bottom = 8.dp).semantics { liveRegion = LiveRegionMode.Polite },
+                            textAlign = TextAlign.Center)
+                    }
+                    Button(onClick = onCreatePdf, enabled = !saving,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                        .testTag("crea_pdf_anteprima")) {
+                        Icon(painterResource(R.drawable.ic_picture_as_pdf), null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.action_create_pdf))
+                    }
+                }
             }
-            OutlinedTextField(
-                value = photo.caption,
-                onValueChange = onCaptionChange,
-                label = { Text(stringResource(R.string.caption_label)) },
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedLabelColor = MaterialTheme.colorScheme.secondary,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.secondary,
-                    focusedBorderColor = MaterialTheme.colorScheme.secondary,
-                    cursorColor = MaterialTheme.colorScheme.secondary,
-                ),
-                supportingText = { Text(stringResource(R.string.caption_support)) },
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center,
-                ),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(
-                    onClick = onMoveBefore,
-                    enabled = canMoveBefore,
-                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-                ) {
-                    Text(stringResource(R.string.move_before))
-                }
-                OutlinedButton(
-                    onClick = onMoveAfter,
-                    enabled = canMoveAfter,
-                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-                ) {
-                    Text(stringResource(R.string.move_after))
-                }
-                TextButton(
-                    onClick = onDelete,
-                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-                ) {
-                    Text(stringResource(R.string.delete))
+        },
+    ) { insets ->
+        BoxWithConstraints(Modifier.fillMaxSize().padding(insets), contentAlignment = Alignment.Center) {
+            val previewWidth = minOf(maxWidth - 64.dp,
+                (maxHeight - 72.dp).coerceAtLeast(48.dp) * (210f / 297f), 420.dp)
+            LazyRow(contentPadding = PaddingValues(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                itemsIndexed(paths) { index, path ->
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Card(elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                            shape = MaterialTheme.shapes.small,
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+                            LocalImage(path, Modifier.width(previewWidth).aspectRatio(210f / 297f),
+                                stringResource(R.string.preview_page_description, index + 1))
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        Text(stringResource(R.string.page_position, index + 1, paths.size),
+                            style = MaterialTheme.typography.labelLarge)
+                    }
                 }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun LocalImage(
-    path: String,
-    modifier: Modifier,
-    description: String,
-    crop: CropRect? = null,
-    maximumSide: Int = 1024,
-) {
+private fun PdfResultScreen(pageCount: Int, message: String?, onBack: () -> Unit,
+    onOpen: () -> Unit, onShare: () -> Unit) {
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = { WorkspaceTopBar(stringResource(R.string.pdf_ready_title), onBack) },
+    ) { insets ->
+        Column(Modifier.fillMaxSize().padding(insets).verticalScroll(androidx.compose.foundation.rememberScrollState())
+            .padding(24.dp), verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(Modifier.size(136.dp).clip(MaterialTheme.shapes.large)
+                .background(MaterialTheme.colorScheme.secondaryContainer), contentAlignment = Alignment.Center) {
+                Icon(painterResource(R.drawable.ic_check_circle), null, Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.secondary)
+            }
+            Spacer(Modifier.height(24.dp))
+            Text(pluralStringResource(R.plurals.pdf_ready, pageCount, pageCount),
+                style = MaterialTheme.typography.headlineLarge, textAlign = TextAlign.Center)
+            MessageText(message)
+            Spacer(Modifier.height(24.dp))
+            SavedPdfActions(onOpen, onShare)
+            Spacer(Modifier.height(12.dp))
+            TextButton(onClick = onBack, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(stringResource(R.string.back_to_album))
+            }
+        }
+    }
+}
+
+@Composable
+internal fun SavedPdfActions(onOpen: () -> Unit, onShare: () -> Unit) {
+    Column(Modifier.fillMaxWidth().testTag("azioni_pdf_salvato"),
+        verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Button(onClick = onOpen, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+            Text(stringResource(R.string.open_pdf))
+        }
+        OutlinedButton(onClick = onShare, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+            Text(stringResource(R.string.share_pdf))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun WorkspaceTopBar(title: String, onBack: () -> Unit,
+    containerColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.background) {
+    TopAppBar(
+        title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.navigate_back))
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = containerColor),
+    )
+}
+
+@Composable
+private fun MessageText(message: String?) {
+    if (message != null) {
+        Text(message, Modifier.fillMaxWidth().padding(top = 12.dp)
+            .semantics { liveRegion = LiveRegionMode.Polite },
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+    }
+}
+
+@Composable
+internal fun PdfNameDialog(name: String, error: String?, onNameChange: (String) -> Unit,
+    onCancel: () -> Unit, onSave: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text(stringResource(R.string.pdf_name_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(value = name, onValueChange = onNameChange, singleLine = true,
+                    label = { Text(stringResource(R.string.file_name_label)) }, isError = error != null,
+                    modifier = Modifier.fillMaxWidth().testTag("nome_file_pdf"))
+                error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            }
+        },
+        dismissButton = { TextButton(onClick = onCancel) { Text(stringResource(R.string.cancel)) } },
+        confirmButton = { Button(onClick = onSave) { Text(stringResource(R.string.save)) } },
+    )
+}
+
+@Composable
+private fun LocalImage(path: String, modifier: Modifier, description: String,
+    crop: CropRect? = null, maximumSide: Int = 1024) {
     val image by key(path, crop, maximumSide) {
         produceState<ImageLoadState>(ImageLoadState.Loading) {
             val bitmap = withContext(Dispatchers.IO) {
@@ -689,18 +670,12 @@ private fun LocalImage(
         }
     }
     when (val current = image) {
-        is ImageLoadState.Ready ->
-            Image(current.bitmap, description, modifier, contentScale = ContentScale.Fit)
-        ImageLoadState.Loading, ImageLoadState.Failed -> {
-            Box(
-                modifier.background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (current == ImageLoadState.Failed) {
-                    Text(stringResource(R.string.image_unavailable))
-                }
-            }
-        }
+        is ImageLoadState.Ready -> Image(current.bitmap, description, modifier,
+            contentScale = ContentScale.Fit)
+        ImageLoadState.Loading, ImageLoadState.Failed -> Box(
+            modifier.background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center,
+        ) { if (current == ImageLoadState.Failed) Text(stringResource(R.string.image_unavailable)) }
     }
 }
 
@@ -708,60 +683,4 @@ private sealed interface ImageLoadState {
     data object Loading : ImageLoadState
     data object Failed : ImageLoadState
     data class Ready(val bitmap: androidx.compose.ui.graphics.ImageBitmap) : ImageLoadState
-}
-
-@Composable
-private fun PreviewDialog(paths: List<String>, onClose: () -> Unit) {
-    val configuration = LocalConfiguration.current
-    val previewWidth = minOf(
-        260.dp,
-        (configuration.screenWidthDp - 96).coerceAtLeast(120).dp,
-        (configuration.screenHeightDp - 220).coerceAtLeast(120).dp * (210f / 297f),
-    )
-    AlertDialog(
-        onDismissRequest = onClose,
-        shape = MaterialTheme.shapes.large,
-        containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = 0.dp,
-        confirmButton = {
-            Button(onClick = onClose) { Text(stringResource(R.string.close)) }
-        },
-        title = {
-            Text(
-                stringResource(R.string.preview_a4_title),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-        },
-        text = {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(paths.size) { index ->
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Card(
-                            shape = MaterialTheme.shapes.small,
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surface,
-                            ),
-                            border = BorderStroke(
-                                1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
-                            ),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                        ) {
-                            LocalImage(
-                                paths[index],
-                                Modifier.width(previewWidth).aspectRatio(210f / 297f),
-                                stringResource(R.string.preview_page_description, index + 1),
-                            )
-                        }
-                        Text(
-                            stringResource(R.string.page_position, index + 1, paths.size),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 8.dp),
-                        )
-                    }
-                }
-            }
-        },
-    )
 }

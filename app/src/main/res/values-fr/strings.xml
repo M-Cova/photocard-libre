@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="home_title">ACCUEIL</string>
     <string name="open_settings">Ouvrir les paramètres</string>
     <string name="navigate_back">Retour</string>
     <string name="action_add_photos">AJOUTER DES PHOTOS</string>
-    <string name="action_preview">APERÇU</string>
+    <string name="action_preview">APERÇU PDF</string>
     <string name="action_create_pdf">CRÉER UN PDF</string>
-    <string name="empty_album_hint">Touchez AJOUTER DES PHOTOS pour commencer.</string>
     <plurals name="photo_count">
         <item quantity="one">%1$d photo</item>
         <item quantity="many">%1$d photos</item>
@@ -15,10 +13,8 @@
     <string name="selected_photo_heading">PHOTO SÉLECTIONNÉE</string>
     <string name="selected_photo_description">Photo sélectionnée</string>
     <string name="photo_thumbnail_description">Miniature de %1$s</string>
-    <string name="edit_photo">MODIFIER LA PHOTO</string>
+    <string name="aspect_ratio">FORMAT D’IMAGE</string>
     <string name="caption_label">LÉGENDE</string><string name="caption_support">4 mots maximum</string>
-    <string name="move_before">AVANT</string>
-    <string name="move_after">APRÈS</string>
     <string name="delete">SUPPRIMER</string>
     <string name="image_unavailable">Image indisponible</string>
     <string name="crop_editor_title">MODIFIER LA PHOTO</string>
@@ -27,7 +23,6 @@
     <string name="preview_a4_title">APERÇU A4</string>
     <string name="preview_page_description">Aperçu de la page %1$d</string>
     <string name="page_position">Page %1$d sur %2$d</string>
-    <string name="close">FERMER</string>
     <string name="pdf_name_title">NOM DU FICHIER PDF</string>
     <string name="file_name_label">NOM DU FICHIER</string>
     <string name="cancel">ANNULER</string>
@@ -82,4 +77,20 @@
     <string name="privacy_description">Les photos sont traitées localement sur l’appareil et ne sont pas envoyées à des serveurs externes.</string>
     <string name="credits_label">Crédits</string>
     <string name="value_to_be_defined">À définir</string>
+    <string name="album_heading">Album</string>
+    <string name="empty_album_title">Votre album commence ici</string>
+    <string name="photo_detail_title">Photo</string>
+    <string name="photo_position">Photo %1$d sur %2$d</string>
+    <string name="reorder_heading">Ordre dans l’album</string>
+    <string name="done">TERMINÉ</string>
+    <string name="pdf_ready_title">PDF prêt</string>
+    <string name="back_to_album">RETOUR À L’ALBUM</string>
+    <string name="album_tap_to_edit">Touchez une photo pour la modifier.</string>
+    <string name="move_before_target">Déplacer en position %1$d, avant %2$s</string>
+    <string name="move_after_target">Déplacer en position %1$d, après %2$s</string>
+    <string name="album_reorder_hint">Utilisez les flèches sous chaque photo pour changer l’ordre.</string>
+    <string name="move_before_short">Avant</string>
+    <string name="move_after_short">Après</string>
+    <string name="delete_photo_confirmation_title">Supprimer cette photo ?</string>
+    <string name="delete_photo_confirmation_message">«%1$s» sera supprimée de l’album.</string>
 </resources>

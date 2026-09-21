@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="home_title">HOME</string><string name="open_settings">Open settings</string><string name="navigate_back">Back</string>
-    <string name="action_add_photos">ADD PHOTOS</string><string name="action_preview">PREVIEW</string><string name="action_create_pdf">CREATE PDF</string>
-    <string name="empty_album_hint">Tap ADD PHOTOS to begin.</string><plurals name="photo_count"><item quantity="one">%1$d photo</item><item quantity="other">%1$d photos</item></plurals>
+    <string name="open_settings">Open settings</string><string name="navigate_back">Back</string>
+    <string name="action_add_photos">ADD PHOTOS</string><string name="action_preview">PREVIEW PDF</string><string name="action_create_pdf">CREATE PDF</string>
+    <plurals name="photo_count"><item quantity="one">%1$d photo</item><item quantity="other">%1$d photos</item></plurals>
     <string name="selected_photo_heading">SELECTED PHOTO</string><string name="selected_photo_description">Selected photo</string><string name="photo_thumbnail_description">Thumbnail of %1$s</string>
-    <string name="edit_photo">EDIT PHOTO</string><string name="caption_label">CAPTION</string><string name="caption_support">Up to 4 words</string><string name="move_before">BEFORE</string><string name="move_after">AFTER</string><string name="delete">DELETE</string><string name="image_unavailable">Image unavailable</string>
+    <string name="aspect_ratio">ASPECT RATIO</string><string name="caption_label">CAPTION</string><string name="caption_support">Up to 4 words</string><string name="delete">DELETE</string><string name="image_unavailable">Image unavailable</string>
     <string name="crop_editor_title">EDIT PHOTO</string><string name="crop_original">ORIGINAL</string><string name="confirm">CONFIRM</string>
-    <string name="preview_a4_title">A4 PREVIEW</string><string name="preview_page_description">Preview of page %1$d</string><string name="page_position">Page %1$d of %2$d</string><string name="close">CLOSE</string>
+    <string name="preview_a4_title">A4 PREVIEW</string><string name="preview_page_description">Preview of page %1$d</string><string name="page_position">Page %1$d of %2$d</string>
     <string name="pdf_name_title">PDF FILE NAME</string><string name="file_name_label">FILE NAME</string><string name="cancel">CANCEL</string><string name="save">SAVE</string><string name="open_pdf">OPEN PDF</string><string name="share_pdf">SHARE PDF</string>
     <plurals name="pdf_ready"><item quantity="one">PDF ready (%1$d page)</item><item quantity="other">PDF ready (%1$d pages)</item></plurals><string name="pdf_saving">Saving PDF…</string><string name="pdf_name_invalid">Enter a valid PDF name.</string><string name="pdf_open_chooser_title">Open PDF</string><string name="pdf_share_chooser_title">Share PDF</string>
     <string name="message_importing_photos">Importing photos…</string><string name="message_no_photos_opened">The selected photos could not be opened. Use JPEG or PNG.</string><string name="message_some_photos_not_opened">Some photos could not be opened. Use JPEG or PNG.</string><string name="message_caption_max_words">The caption can contain up to 4 words.</string><string name="message_add_photo_first">Add at least one photo.</string><string name="message_creating_pdf">Creating PDF…</string><string name="message_creating_preview">Creating preview…</string><string name="message_pdf_creation_error">An error occurred while creating the PDF.</string><string name="message_pdf_saved_downloads">PDF saved in %1$s</string><string name="message_pdf_saved_selected_location">PDF saved in the selected location.</string><string name="message_pdf_save_failed">The PDF was created but could not be saved.</string><string name="message_pdf_open_failed">The PDF could not be opened.</string><string name="message_pdf_share_failed">The PDF could not be shared.</string><string name="default_photo_name">Photo</string>
@@ -14,4 +14,20 @@
     <string name="pdf_image_size_section">PDF IMAGE SIZE</string><string name="pdf_image_size_support">Maximum size calculated on the longest side</string><string name="pdf_caption_size_section">PDF CAPTION SIZE</string><string name="caption_size_small">Small</string><string name="caption_size_medium">Medium</string><string name="caption_size_large">Large</string>
     <string name="app_info_section">APP INFO</string><string name="app_info_entry">App info</string><string name="app_info_title">APP INFO</string><string name="app_description">Free app for creating printable photo cards with captions.</string><string name="open_source_description">PhotoCard Libre is free and open-source software.</string>
     <string name="version_label">Version</string><string name="software_license_label">Software license</string><string name="graphic_resources_license_label">Graphic resources license</string><string name="source_repository_label">Source repository</string><string name="report_issue_label">Report an issue</string><string name="privacy_label">Privacy</string><string name="privacy_description">Photos are processed locally on the device and are not sent to external servers.</string><string name="credits_label">Credits</string><string name="value_to_be_defined">To be defined</string>
+    <string name="album_heading">Album</string>
+    <string name="empty_album_title">Your album starts here</string>
+    <string name="photo_detail_title">Photo</string>
+    <string name="photo_position">Photo %1$d of %2$d</string>
+    <string name="reorder_heading">Order in album</string>
+    <string name="done">DONE</string>
+    <string name="pdf_ready_title">PDF ready</string>
+    <string name="back_to_album">BACK TO ALBUM</string>
+    <string name="album_tap_to_edit">Tap a photo to edit it.</string>
+    <string name="move_before_target">Move to position %1$d, before %2$s</string>
+    <string name="move_after_target">Move to position %1$d, after %2$s</string>
+    <string name="album_reorder_hint">Use the arrows below each photo to change its order.</string>
+    <string name="move_before_short">Before</string>
+    <string name="move_after_short">After</string>
+    <string name="delete_photo_confirmation_title">Delete this photo?</string>
+    <string name="delete_photo_confirmation_message">“%1$s” will be removed from the album.</string>
 </resources>

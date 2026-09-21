@@ -11,7 +11,7 @@ class CropTest {
         assertNull(CropPreset.ORIGINAL.defaultRect(1600, 900))
         val state = AlbumState().add(
             listOf(PhotoEntry("1", "/cache/photo.jpg", "photo.jpg")),
-        ).updateSelectedCrop(CropRect(0.1, 0.1, 0.8, 0.8))
+        ).select("1").updateSelectedCrop(CropRect(0.1, 0.1, 0.8, 0.8))
         assertNull(state.updateSelectedCrop(null).selectedPhoto?.crop)
     }
 
