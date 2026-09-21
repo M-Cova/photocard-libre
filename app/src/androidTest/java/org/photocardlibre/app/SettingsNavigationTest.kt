@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performScrollTo
 import org.junit.Rule
 import org.junit.Test
 import org.photocardlibre.app.settings.PdfImageSize
+import org.photocardlibre.app.settings.PdfCaptionSize
 import org.photocardlibre.app.settings.SettingsRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -81,6 +82,22 @@ class SettingsNavigationTest {
         composeRule.activityRule.scenario.recreate()
         openSettings()
         composeRule.onNodeWithTag("pdf_size_7").assertIsSelected()
+    }
+
+    @Test
+    fun selectedCaptionSizeRemainsSelectedAfterActivityRecreation() {
+        openSettings()
+        composeRule.onNodeWithText("Grande").performScrollTo().performClick()
+        composeRule.waitUntil {
+            runBlocking {
+                SettingsRepository(composeRule.activity).pdfCaptionSize.first() ==
+                    PdfCaptionSize.LARGE
+            }
+        }
+
+        composeRule.activityRule.scenario.recreate()
+        openSettings()
+        composeRule.onNodeWithTag("caption_size_large").assertIsSelected()
     }
 
     private fun openSettings() {

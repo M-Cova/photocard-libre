@@ -13,12 +13,17 @@ from .models import LayoutResult, Placement
 from .typography import caption_layout, resolve_font
 
 
-def _caption(placement: Placement) -> tuple[list[str], float]:
+def _caption(placement: Placement, caption_size: str) -> tuple[list[str], float]:
     width = placement.geometry.width - 2 * config.CAPTION_HORIZONTAL_PADDING_PT
-    return caption_layout(placement.item.caption, width)
+    return caption_layout(placement.item.caption, width, caption_size)
 
 
-def create_pdf(layout: LayoutResult, destination: Path | str, cutting_border: bool = True) -> None:
+def create_pdf(
+    layout: LayoutResult,
+    destination: Path | str,
+    cutting_border: bool = True,
+    caption_size: str = config.DEFAULT_CAPTION_SIZE,
+) -> None:
     if not layout.pages:
         raise ValueError("Aggiungi almeno una fotografia prima di creare il PDF.")
     destination = Path(destination)
@@ -47,7 +52,7 @@ def create_pdf(layout: LayoutResult, destination: Path | str, cutting_border: bo
                         stroke=1, fill=0,
                     )
 
-                lines, font_size = _caption(placement)
+                lines, font_size = _caption(placement, caption_size)
                 if lines:
                     canvas.setFillColor(black)
                     canvas.setFont(font_name, font_size)
@@ -73,6 +78,7 @@ def render_preview_page(
     page_index: int,
     dpi: int = config.PREVIEW_DPI,
     cutting_border: bool = True,
+    caption_size: str = config.DEFAULT_CAPTION_SIZE,
 ) -> Image.Image:
     if page_index < 0 or page_index >= len(layout.pages):
         raise IndexError("Pagina di anteprima inesistente.")
@@ -100,9 +106,9 @@ def render_preview_page(
             border = max(1, round(config.TILE_BORDER_PT * scale))
             draw.rectangle((x, y, x + tile_width, y + tile_height), outline="black", width=border)
 
-        lines, font_size = _caption(placement)
+        lines, font_size = _caption(placement, caption_size)
         if lines:
-            pixel_font_size = max(7, round(font_size * scale))
+            pixel_font_size = max(1, round(font_size * scale))
             font = ImageFont.truetype(font_path, pixel_font_size)
             line_height = (font_size + config.CAPTION_LINE_GAP_PT) * scale
             band_top = (placement.y + geometry.height - config.TILE_CAPTION_AREA_PT) * scale

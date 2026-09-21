@@ -24,13 +24,18 @@ def _width(text: str, font_name: str, size: float) -> float:
     return pdfmetrics.stringWidth(text, font_name, size)
 
 
-def caption_layout(text: str, available_width: float) -> tuple[list[str], float]:
+def caption_layout(
+    text: str,
+    available_width: float,
+    caption_size: str = config.DEFAULT_CAPTION_SIZE,
+) -> tuple[list[str], float]:
+    preferred_size = config.caption_font_size(caption_size)
     if not text:
-        return [], config.CAPTION_FONT_SIZE_PT
+        return [], preferred_size
     font_name, _ = resolve_font()
     words = text.split()
     for size_tenths in range(
-        int(config.CAPTION_FONT_SIZE_PT * 10),
+        int(preferred_size * 10),
         int(config.CAPTION_MIN_FONT_SIZE_PT * 10) - 1,
         -1,
     ):
@@ -45,8 +50,8 @@ def caption_layout(text: str, available_width: float) -> tuple[list[str], float]
                 candidates.append((widest, lines))
         if candidates:
             return min(candidates, key=lambda candidate: (candidate[0], candidate[1]))[1], size
-    size = config.CAPTION_MIN_FONT_SIZE_PT
-    while size > 3.0 and _width(text, font_name, size) > available_width:
-        size -= 0.25
+    size = min(
+        config.CAPTION_MIN_FONT_SIZE_PT,
+        available_width / _width(text, font_name, 1.0),
+    )
     return [text], size
-

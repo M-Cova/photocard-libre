@@ -21,11 +21,28 @@ TILE_CAPTION_AREA_PT = cm_to_points(0.90)
 TILE_BORDER_PT = 0.7
 TILE_GAP_PT = cm_to_points(0.35)
 
-CAPTION_FONT_SIZE_PT = 10.0
+CAPTION_SIZE_SMALL = "small"
+CAPTION_SIZE_MEDIUM = "medium"
+CAPTION_SIZE_LARGE = "large"
+CAPTION_FONT_SIZES_PT = {
+    CAPTION_SIZE_SMALL: 9.0,
+    CAPTION_SIZE_MEDIUM: 10.0,
+    CAPTION_SIZE_LARGE: 11.0,
+}
+DEFAULT_CAPTION_SIZE = CAPTION_SIZE_MEDIUM
+# Alias compatibile con il valore storico: Media mantiene esattamente 10 pt.
+CAPTION_FONT_SIZE_PT = CAPTION_FONT_SIZES_PT[DEFAULT_CAPTION_SIZE]
 CAPTION_MIN_FONT_SIZE_PT = 6.5
 CAPTION_LINE_GAP_PT = 1.5
 CAPTION_HORIZONTAL_PADDING_PT = cm_to_points(0.12)
 MAX_CAPTION_WORDS = 4
+
+
+def caption_font_size(caption_size: str) -> float:
+    try:
+        return CAPTION_FONT_SIZES_PT[caption_size]
+    except KeyError as error:
+        raise ValueError("Dimensione didascalia PDF non supportata.") from error
 
 SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png"}
 PREVIEW_DPI = 92

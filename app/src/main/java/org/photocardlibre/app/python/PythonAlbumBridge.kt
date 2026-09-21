@@ -5,6 +5,7 @@ import android.util.Log
 import com.chaquo.python.Python
 import org.photocardlibre.app.model.PhotoEntry
 import org.photocardlibre.app.settings.PdfImageSize
+import org.photocardlibre.app.settings.PdfCaptionSize
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -19,6 +20,7 @@ class PythonAlbumBridge(context: Context) {
         includePdf: Boolean,
         pdfImageSize: PdfImageSize,
         cuttingBorderEnabled: Boolean,
+        pdfCaptionSize: PdfCaptionSize,
     ): Result<RenderResult> = runCatching {
         outputDirectory.mkdirs()
         val payload = JSONArray().apply {
@@ -46,6 +48,7 @@ class PythonAlbumBridge(context: Context) {
                 includePdf,
                 pdfImageSize.centimeters,
                 cuttingBorderEnabled,
+                pdfCaptionSize.storageValue,
             )
             .toString()
         val json = JSONObject(rawResult)

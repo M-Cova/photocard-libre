@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import java.io.IOException
 import kotlinx.coroutines.flow.Flow
@@ -34,6 +35,20 @@ class SettingsRepository internal constructor(
         }
     }
 
+    val pdfCaptionSize: Flow<PdfCaptionSize> = dataStore.data
+        .catch { error ->
+            if (error is IOException) emit(emptyPreferences()) else throw error
+        }
+        .map { preferences ->
+            PdfCaptionSize.fromStorageValue(preferences[PDF_CAPTION_SIZE])
+        }
+
+    suspend fun setPdfCaptionSize(size: PdfCaptionSize) {
+        dataStore.edit { preferences ->
+            preferences[PDF_CAPTION_SIZE] = size.storageValue
+        }
+    }
+
     val cuttingBorderEnabled: Flow<Boolean> = dataStore.data
         .catch { error ->
             if (error is IOException) emit(emptyPreferences()) else throw error
@@ -50,6 +65,7 @@ class SettingsRepository internal constructor(
 
     private companion object {
         val CUTTING_BORDER_ENABLED = booleanPreferencesKey("cutting_border_enabled")
+        val PDF_CAPTION_SIZE = stringPreferencesKey("pdf_caption_size")
         val PDF_IMAGE_SIZE_CM = intPreferencesKey("pdf_image_size_cm")
     }
 }

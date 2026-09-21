@@ -106,6 +106,8 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
         AppDestination.SETTINGS -> SettingsScreen(
             selectedImageSize = viewModel.state.pdfImageSize,
             onImageSizeSelected = viewModel::selectPdfImageSize,
+            selectedCaptionSize = viewModel.state.pdfCaptionSize,
+            onCaptionSizeSelected = viewModel::selectPdfCaptionSize,
             cuttingBorderEnabled = viewModel.state.cuttingBorderEnabled,
             onCuttingBorderToggled = viewModel::setCuttingBorder,
             onBack = { destination = AppDestination.HOME },

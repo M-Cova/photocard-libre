@@ -29,7 +29,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -40,6 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.photocardlibre.app.R
+import org.photocardlibre.app.settings.PdfCaptionSize
 import org.photocardlibre.app.settings.PdfImageSize
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,6 +47,8 @@ import org.photocardlibre.app.settings.PdfImageSize
 internal fun SettingsScreen(
     selectedImageSize: PdfImageSize,
     onImageSizeSelected: (PdfImageSize) -> Unit,
+    selectedCaptionSize: PdfCaptionSize,
+    onCaptionSizeSelected: (PdfCaptionSize) -> Unit,
     cuttingBorderEnabled: Boolean,
     onCuttingBorderToggled: (Boolean) -> Unit,
     onBack: () -> Unit,
@@ -54,7 +56,6 @@ internal fun SettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     var selectedLanguage by rememberSaveable { mutableIntStateOf(R.string.language_system) }
-    var selectedCaptionSize by rememberSaveable { mutableIntStateOf(R.string.caption_size_medium) }
 
     BackHandler(onBack = onBack)
 
@@ -116,14 +117,15 @@ internal fun SettingsScreen(
             SettingsDivider()
             SettingsSectionTitle(R.string.pdf_caption_size_section)
             listOf(
-                R.string.caption_size_small,
-                R.string.caption_size_medium,
-                R.string.caption_size_large,
-            ).forEach { option ->
+                PdfCaptionSize.SMALL to R.string.caption_size_small,
+                PdfCaptionSize.MEDIUM to R.string.caption_size_medium,
+                PdfCaptionSize.LARGE to R.string.caption_size_large,
+            ).forEach { (size, label) ->
                 RadioSettingsOption(
-                    label = option,
-                    selected = selectedCaptionSize == option,
-                    onSelect = { selectedCaptionSize = option },
+                    label = label,
+                    selected = selectedCaptionSize == size,
+                    onSelect = { onCaptionSizeSelected(size) },
+                    radioTestTag = "caption_size_${size.storageValue}",
                 )
             }
 

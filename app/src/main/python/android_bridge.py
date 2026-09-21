@@ -17,6 +17,7 @@ def render_album(
     include_pdf: bool,
     max_photo_side_cm: int = config.DEFAULT_MAX_PHOTO_SIDE_CM,
     cutting_border_enabled: bool = True,
+    caption_size: str = config.DEFAULT_CAPTION_SIZE,
 ) -> str:
     try:
         raw_items = json.loads(items_json)
@@ -39,13 +40,23 @@ def render_album(
         preview_paths = []
         for page_index in range(len(layout.pages)):
             preview_path = output / f"anteprima-{page_index + 1}.png"
-            render_preview_page(layout, page_index, cutting_border=cutting_border_enabled).save(preview_path, "PNG")
+            render_preview_page(
+                layout,
+                page_index,
+                cutting_border=cutting_border_enabled,
+                caption_size=caption_size,
+            ).save(preview_path, "PNG")
             preview_paths.append(str(preview_path))
 
         pdf_path = None
         if include_pdf:
             destination = output / "foto-album.pdf"
-            create_pdf(layout, destination, cutting_border=cutting_border_enabled)
+            create_pdf(
+                layout,
+                destination,
+                cutting_border=cutting_border_enabled,
+                caption_size=caption_size,
+            )
             if not destination.read_bytes().startswith(b"%PDF"):
                 raise RuntimeError("Output PDF non valido")
             pdf_path = str(destination)

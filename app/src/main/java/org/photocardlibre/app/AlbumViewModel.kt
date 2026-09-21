@@ -14,6 +14,7 @@ import org.photocardlibre.app.python.AlbumRenderException
 import org.photocardlibre.app.python.PythonAlbumBridge
 import org.photocardlibre.app.storage.PhotoCacheAdapter
 import org.photocardlibre.app.settings.PdfImageSize
+import org.photocardlibre.app.settings.PdfCaptionSize
 import org.photocardlibre.app.settings.SettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,6 +32,7 @@ data class AlbumUiState(
     val savedPdfUri: String? = null,
     val pdfSaving: Boolean = false,
     val pdfImageSize: PdfImageSize = PdfImageSize.DEFAULT,
+    val pdfCaptionSize: PdfCaptionSize = PdfCaptionSize.DEFAULT,
     val cuttingBorderEnabled: Boolean = true,
 ) {
     val hasSavedPdfActions: Boolean
@@ -57,6 +59,11 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
                 state = state.copy(cuttingBorderEnabled = enabled)
             }
         }
+        viewModelScope.launch {
+            settings.pdfCaptionSize.collect { savedSize ->
+                state = state.copy(pdfCaptionSize = savedSize)
+            }
+        }
     }
 
     fun selectPdfImageSize(size: PdfImageSize) {
@@ -76,6 +83,18 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
         if (enabled == state.cuttingBorderEnabled) return
         state = state.copy(cuttingBorderEnabled = enabled)
         viewModelScope.launch { settings.setCuttingBorderEnabled(enabled) }
+    }
+
+    fun selectPdfCaptionSize(size: PdfCaptionSize) {
+        if (size == state.pdfCaptionSize) return
+
+        state = state.copy(
+            pdfCaptionSize = size,
+            previewPaths = emptyList(),
+            pdfPath = null,
+            savedPdfUri = null,
+        )
+        viewModelScope.launch { settings.setPdfCaptionSize(size) }
     }
 
     fun importUris(uris: List<Uri>) {
@@ -140,10 +159,17 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
         )
         val photos = state.album.photos
         val pdfImageSize = state.pdfImageSize
+        val pdfCaptionSize = state.pdfCaptionSize
         val cuttingBorderEnabled = state.cuttingBorderEnabled
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO) {
-                python.render(photos, includePdf, pdfImageSize, cuttingBorderEnabled)
+                python.render(
+                    photos,
+                    includePdf,
+                    pdfImageSize,
+                    cuttingBorderEnabled,
+                    pdfCaptionSize,
+                )
             }
             result.fold(
                 onSuccess = { rendered ->

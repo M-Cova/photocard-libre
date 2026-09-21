@@ -16,15 +16,15 @@ class CuttingBorderDefaultTest(unittest.TestCase):
     def test_default_cutting_border_is_true_in_python_bridge(self):
         """Il valore di default del parametro cutting_border_enabled deve essere True.
 
-        Signature: render_album(items_json, output_directory, include_pdf, max_photo_side_cm, cutting_border_enabled)
+        Signature: render_album(items_json, output_directory, include_pdf, max_photo_side_cm,
+        cutting_border_enabled, caption_size)
         I defaults tuple si riferiscono agli ultimi parametri con default:
-        (max_photo_side_cm=5, cutting_border_enabled=True), quindi index [-1]."""
+        (max_photo_side_cm=5, cutting_border_enabled=True, caption_size="medium")."""
         from android_bridge import render_album
-        # I defaults sono (5, True) per (max_photo_side_cm, cutting_border_enabled)
+        # I defaults coprono dimensione foto, bordo e dimensione didascalia.
         defaults = render_album.__defaults__
-        self.assertEqual(len(defaults), 2)
-        # cutting_border_enabled è l'ultimo default
-        self.assertTrue(defaults[-1] is True)
+        self.assertEqual(len(defaults), 3)
+        self.assertTrue(defaults[-2] is True)
 
     def test_default_cutting_border_is_true_in_rendering(self):
         """Senza parametro cutting_border esplicito, il bordo produce un PDF più grande."""

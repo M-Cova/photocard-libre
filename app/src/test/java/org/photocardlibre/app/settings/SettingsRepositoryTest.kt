@@ -46,4 +46,37 @@ class SettingsRepositoryTest {
             secondScope.cancel()
         }
     }
+
+    @Test
+    fun captionSizeDefaultsToMediumAndEverySelectionPersists() = runBlocking {
+        PdfCaptionSize.entries.forEach { selectedSize ->
+            val preferencesFile = File(
+                temporaryFolder.newFolder(selectedSize.storageValue),
+                "settings.preferences_pb",
+            )
+            val firstScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            val firstStore = PreferenceDataStoreFactory.create(
+                scope = firstScope,
+                produceFile = { preferencesFile },
+            )
+            val firstRepository = SettingsRepository(firstStore)
+
+            assertEquals(PdfCaptionSize.MEDIUM, firstRepository.pdfCaptionSize.first())
+            firstRepository.setPdfCaptionSize(selectedSize)
+            assertEquals(selectedSize, firstRepository.pdfCaptionSize.first())
+            firstScope.cancel()
+
+            val secondScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            try {
+                val secondStore = PreferenceDataStoreFactory.create(
+                    scope = secondScope,
+                    produceFile = { preferencesFile },
+                )
+                val secondRepository = SettingsRepository(secondStore)
+                assertEquals(selectedSize, secondRepository.pdfCaptionSize.first())
+            } finally {
+                secondScope.cancel()
+            }
+        }
+    }
 }

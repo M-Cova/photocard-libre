@@ -61,14 +61,14 @@ class AndroidCoreTests(unittest.TestCase):
         for max_side_cm in (7, 10):
             observed = []
 
-            def capture_preview(layout, page_index, cutting_border=True):
+            def capture_preview(layout, page_index, cutting_border=True, caption_size="medium"):
                 observed.append(("preview", max(
                     layout.pages[page_index].placements[0].geometry.photo_width,
                     layout.pages[page_index].placements[0].geometry.photo_height,
                 )))
                 return Image.new("RGB", (10, 10), "white")
 
-            def capture_pdf(layout, destination, cutting_border=True):
+            def capture_pdf(layout, destination, cutting_border=True, caption_size="medium"):
                 observed.append(("pdf", max(
                     layout.pages[0].placements[0].geometry.photo_width,
                     layout.pages[0].placements[0].geometry.photo_height,
