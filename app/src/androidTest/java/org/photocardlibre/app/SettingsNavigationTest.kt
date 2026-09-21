@@ -63,9 +63,6 @@ class SettingsNavigationTest {
     fun settingsShowsMainOptions() {
         openSettings()
         listOf(
-            "System",
-            "Italiano",
-            "English",
             "5 cm",
             "7 cm",
             "10 cm",
@@ -77,6 +74,19 @@ class SettingsNavigationTest {
         ).forEach { label ->
             composeRule.onNodeWithText(label).performScrollTo().assertIsDisplayed()
         }
+        composeRule.onNodeWithTag("apri_lingua").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("English").assertIsDisplayed()
+    }
+
+    @Test
+    fun languageScreenShowsAllOptionsAndSystemBackReturnsToSettings() {
+        openLanguage()
+        composeRule.onNodeWithTag("schermata_lingua").assertIsDisplayed()
+        listOf("System", "Italiano", "English", "Español", "Deutsch", "Français", "Português")
+            .forEach { label -> composeRule.onNodeWithText(label).performScrollTo().assertIsDisplayed() }
+        composeRule.onNodeWithTag("language_en").assertIsSelected()
+        pressSystemBack()
+        composeRule.onNodeWithTag("schermata_impostazioni").assertIsDisplayed()
     }
 
     @Test
@@ -112,26 +122,29 @@ class SettingsNavigationTest {
 
     @Test
     fun languageSelectionIsAppliedToSettingsAndInfoAndRestoredAfterRecreation() {
-        openSettings()
-        composeRule.onNodeWithTag("language_italian").performClick()
+        openLanguage()
+        composeRule.onNodeWithTag("language_it").performClick()
         composeRule.waitUntil {
             runBlocking {
                 SettingsRepository(composeRule.activity).appLanguage.first() == AppLanguage.ITALIAN
             }
         }
-        composeRule.onNodeWithText("IMPOSTAZIONI").assertIsDisplayed()
-        composeRule.onNodeWithTag("language_italian").assertIsSelected()
+        composeRule.onNodeWithText("LINGUA").assertIsDisplayed()
+        composeRule.onNodeWithTag("language_it").assertIsSelected()
+        pressSystemBack()
+        composeRule.onNodeWithText("Italiano").assertIsDisplayed()
         composeRule.onNodeWithTag("apri_info_app").performScrollTo().performClick()
         composeRule.onNodeWithText("INFO SULL'APP").assertIsDisplayed()
 
         composeRule.activityRule.scenario.recreate()
         composeRule.onNodeWithText("INFO SULL'APP").assertIsDisplayed()
         pressSystemBack()
-        composeRule.onNodeWithTag("language_italian").assertIsSelected()
+        composeRule.onNodeWithText("Italiano").assertIsDisplayed()
 
-        composeRule.onNodeWithTag("language_english").performClick()
-        composeRule.onNodeWithText("SETTINGS").assertIsDisplayed()
-        composeRule.onNodeWithTag("language_english").assertIsSelected()
+        composeRule.onNodeWithTag("apri_lingua").performScrollTo().performClick()
+        composeRule.onNodeWithTag("language_en").performClick()
+        composeRule.onNodeWithText("LANGUAGE").assertIsDisplayed()
+        composeRule.onNodeWithTag("language_en").assertIsSelected()
     }
 
     private fun openSettings() {
@@ -141,6 +154,11 @@ class SettingsNavigationTest {
     private fun openInfo() {
         openSettings()
         composeRule.onNodeWithTag("apri_info_app").performScrollTo().performClick()
+    }
+
+    private fun openLanguage() {
+        openSettings()
+        composeRule.onNodeWithTag("apri_lingua").performClick()
     }
 
     private fun pressSystemBack() {

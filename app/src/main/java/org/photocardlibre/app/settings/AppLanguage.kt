@@ -6,6 +6,10 @@ enum class AppLanguage(val storageValue: String) {
     SYSTEM("system"),
     ITALIAN("it"),
     ENGLISH("en"),
+    SPANISH("es"),
+    GERMAN("de"),
+    FRENCH("fr"),
+    PORTUGUESE("pt"),
     ;
 
     companion object {
@@ -17,11 +21,12 @@ enum class AppLanguage(val storageValue: String) {
         fun resolvedLocale(language: AppLanguage, systemLocale: Locale): Locale = when (language) {
             ITALIAN -> Locale.ITALIAN
             ENGLISH -> Locale.ENGLISH
-            SYSTEM -> if (systemLocale.language == Locale.ITALIAN.language) {
-                Locale.ITALIAN
-            } else {
-                Locale.ENGLISH
-            }
+            SPANISH -> Locale.forLanguageTag("es")
+            GERMAN -> Locale.GERMAN
+            FRENCH -> Locale.FRENCH
+            PORTUGUESE -> Locale.forLanguageTag("pt")
+            SYSTEM -> entries.firstOrNull { it != SYSTEM && it.storageValue == systemLocale.language }
+                ?.let { resolvedLocale(it, systemLocale) } ?: Locale.ENGLISH
         }
     }
 }

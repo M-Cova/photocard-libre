@@ -55,6 +55,10 @@
     <string name="language_system">System</string>
     <string name="language_italian">Italiano</string>
     <string name="language_english">English</string>
+    <string name="language_spanish" translatable="false">Español</string>
+    <string name="language_german" translatable="false">Deutsch</string>
+    <string name="language_french" translatable="false">Français</string>
+    <string name="language_portuguese" translatable="false">Português</string>
     <string name="pdf_image_size_section">PDF IMAGE SIZE</string>
     <string name="pdf_image_size_support">Maximum size calculated on the longest side</string>
     <string name="pdf_size_5_cm" translatable="false">5 cm</string>

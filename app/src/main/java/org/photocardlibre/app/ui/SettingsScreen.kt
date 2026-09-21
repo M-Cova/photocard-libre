@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -44,7 +45,7 @@ import org.photocardlibre.app.settings.PdfImageSize
 @Composable
 internal fun SettingsScreen(
     selectedLanguage: AppLanguage,
-    onLanguageSelected: (AppLanguage) -> Unit,
+    onOpenLanguage: () -> Unit,
     selectedImageSize: PdfImageSize,
     onImageSizeSelected: (PdfImageSize) -> Unit,
     selectedCaptionSize: PdfCaptionSize,
@@ -74,24 +75,27 @@ internal fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         ) {
-            SettingsSectionTitle(R.string.language_section)
-            RadioSettingsOption(
-                label = R.string.language_system,
-                selected = selectedLanguage == AppLanguage.SYSTEM,
-                onSelect = { onLanguageSelected(AppLanguage.SYSTEM) },
-                radioTestTag = "language_system",
-            )
-            RadioSettingsOption(
-                label = R.string.language_italian,
-                selected = selectedLanguage == AppLanguage.ITALIAN,
-                onSelect = { onLanguageSelected(AppLanguage.ITALIAN) },
-                radioTestTag = "language_italian",
-            )
-            RadioSettingsOption(
-                label = R.string.language_english,
-                selected = selectedLanguage == AppLanguage.ENGLISH,
-                onSelect = { onLanguageSelected(AppLanguage.ENGLISH) },
-                radioTestTag = "language_english",
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.language_section)) },
+                trailingContent = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            stringResource(selectedLanguage.labelResource),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            "›",
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(start = 12.dp).clearAndSetSemantics { },
+                        )
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp)
+                    .clickable(onClick = onOpenLanguage)
+                    .testTag("apri_lingua"),
             )
 
             SettingsDivider()

@@ -96,6 +96,7 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
     BackHandler(enabled = destination != AppDestination.HOME) {
         destination = when (destination) {
             AppDestination.INFO -> AppDestination.SETTINGS
+            AppDestination.LANGUAGE -> AppDestination.SETTINGS
             AppDestination.SETTINGS -> AppDestination.HOME
             AppDestination.HOME -> AppDestination.HOME
         }
@@ -108,9 +109,7 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
         )
         AppDestination.SETTINGS -> SettingsScreen(
             selectedLanguage = viewModel.state.appLanguage,
-            onLanguageSelected = { language ->
-                viewModel.selectAppLanguage(language) { activity?.recreate() }
-            },
+            onOpenLanguage = { destination = AppDestination.LANGUAGE },
             selectedImageSize = viewModel.state.pdfImageSize,
             onImageSizeSelected = viewModel::selectPdfImageSize,
             selectedCaptionSize = viewModel.state.pdfCaptionSize,
@@ -123,6 +122,13 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
         AppDestination.INFO -> InfoAppScreen(
             onBack = { destination = AppDestination.SETTINGS },
         )
+        AppDestination.LANGUAGE -> LanguageScreen(
+            selectedLanguage = viewModel.state.appLanguage,
+            onLanguageSelected = { language ->
+                viewModel.selectAppLanguage(language) { activity?.recreate() }
+            },
+            onBack = { destination = AppDestination.SETTINGS },
+        )
     }
 }
 
@@ -130,6 +136,7 @@ private enum class AppDestination {
     HOME,
     SETTINGS,
     INFO,
+    LANGUAGE,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

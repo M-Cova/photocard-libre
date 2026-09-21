@@ -5,26 +5,43 @@ import android.os.LocaleList
 import androidx.test.core.app.ApplicationProvider
 import java.util.Locale
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class LocalizedResourcesTest {
     @Test
-    fun italianAndEnglishResourcesAreAvailable() {
+    fun supportedLanguagesHaveLocalizedFundamentalUiStrings() {
         val base = ApplicationProvider.getApplicationContext<android.content.Context>()
-        val italian = base.createConfigurationContext(
-            Configuration(base.resources.configuration).apply {
-                setLocales(LocaleList(Locale.ITALIAN))
-            },
+        val titles = mapOf(
+            "it" to "IMPOSTAZIONI",
+            "en" to "SETTINGS",
+            "es" to "AJUSTES",
+            "de" to "EINSTELLUNGEN",
+            "fr" to "PARAMÈTRES",
+            "pt" to "DEFINIÇÕES",
         )
-        val english = base.createConfigurationContext(
-            Configuration(base.resources.configuration).apply {
-                setLocales(LocaleList(Locale.ENGLISH))
-            },
-        )
-
-        assertEquals("IMPOSTAZIONI", italian.getString(R.string.settings_title))
-        assertEquals("INFO SULL'APP", italian.getString(R.string.app_info_title))
-        assertEquals("SETTINGS", english.getString(R.string.settings_title))
-        assertEquals("APP INFO", english.getString(R.string.app_info_title))
+        titles.forEach { (code, expected) ->
+            val localized = base.createConfigurationContext(
+                Configuration(base.resources.configuration).apply {
+                    setLocales(LocaleList(Locale.forLanguageTag(code)))
+                },
+            )
+            assertEquals(expected, localized.getString(R.string.settings_title))
+            listOf(
+                R.string.action_add_photos,
+                R.string.action_preview,
+                R.string.action_create_pdf,
+                R.string.edit_photo,
+                R.string.selected_photo_heading,
+                R.string.pdf_image_size_section,
+                R.string.pdf_caption_size_section,
+                R.string.cutting_border_section,
+                R.string.app_info_title,
+                R.string.privacy_label,
+                R.string.credits_label,
+            ).forEach { resource ->
+                assertTrue(localized.getString(resource).isNotBlank())
+            }
+        }
     }
 }
