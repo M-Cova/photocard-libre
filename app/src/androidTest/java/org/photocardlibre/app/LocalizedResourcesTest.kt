@@ -35,10 +35,13 @@ class LocalizedResourcesTest {
                 R.string.selected_photo_heading,
                 R.string.pdf_image_size_section,
                 R.string.pdf_caption_size_section,
-                R.string.cutting_border_section,
+                R.string.app_description,
+                R.string.open_source_description,
                 R.string.app_info_title,
                 R.string.privacy_label,
+                R.string.privacy_description,
                 R.string.credits_label,
+                R.string.value_to_be_defined,
             ).forEach { resource ->
                 assertTrue(localized.getString(resource).isNotBlank())
             }

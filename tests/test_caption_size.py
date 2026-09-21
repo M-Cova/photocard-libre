@@ -67,14 +67,14 @@ class CaptionSizeTests(unittest.TestCase):
             observed = []
 
             def capture_preview(
-                layout, page_index, dpi=config.PREVIEW_DPI, cutting_border=True,
+                layout, page_index, dpi=config.PREVIEW_DPI,
                 caption_size=config.DEFAULT_CAPTION_SIZE,
             ):
                 observed.append(("preview", caption_size))
                 return Image.new("RGB", (10, 10), "white")
 
             def capture_pdf(
-                layout, destination, cutting_border=True,
+                layout, destination,
                 caption_size=config.DEFAULT_CAPTION_SIZE,
             ):
                 observed.append(("pdf", caption_size))

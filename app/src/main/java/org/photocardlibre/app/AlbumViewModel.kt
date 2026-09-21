@@ -39,7 +39,6 @@ data class AlbumUiState(
     val pdfSaving: Boolean = false,
     val pdfImageSize: PdfImageSize = PdfImageSize.DEFAULT,
     val pdfCaptionSize: PdfCaptionSize = PdfCaptionSize.DEFAULT,
-    val cuttingBorderEnabled: Boolean = true,
     val appLanguage: AppLanguage = AppLanguage.DEFAULT,
 ) {
     val hasSavedPdfActions: Boolean
@@ -64,11 +63,6 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             settings.pdfImageSize.collect { savedSize ->
                 state = state.copy(pdfImageSize = savedSize)
-            }
-        }
-        viewModelScope.launch {
-            settings.cuttingBorderEnabled.collect { enabled ->
-                state = state.copy(cuttingBorderEnabled = enabled)
             }
         }
         viewModelScope.launch {
@@ -97,12 +91,6 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
             savedPdfUri = null,
         )
         viewModelScope.launch { settings.setPdfImageSize(size) }
-    }
-
-    fun setCuttingBorder(enabled: Boolean) {
-        if (enabled == state.cuttingBorderEnabled) return
-        state = state.copy(cuttingBorderEnabled = enabled)
-        viewModelScope.launch { settings.setCuttingBorderEnabled(enabled) }
     }
 
     fun selectPdfCaptionSize(size: PdfCaptionSize) {
@@ -186,14 +174,12 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
         val photos = state.album.photos
         val pdfImageSize = state.pdfImageSize
         val pdfCaptionSize = state.pdfCaptionSize
-        val cuttingBorderEnabled = state.cuttingBorderEnabled
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO) {
                 python.render(
                     photos,
                     includePdf,
                     pdfImageSize,
-                    cuttingBorderEnabled,
                     pdfCaptionSize,
                 )
             }

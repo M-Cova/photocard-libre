@@ -70,11 +70,8 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.photocardlibre.app.AlbumViewModel
@@ -114,8 +111,6 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
             onImageSizeSelected = viewModel::selectPdfImageSize,
             selectedCaptionSize = viewModel.state.pdfCaptionSize,
             onCaptionSizeSelected = viewModel::selectPdfCaptionSize,
-            cuttingBorderEnabled = viewModel.state.cuttingBorderEnabled,
-            onCuttingBorderToggled = viewModel::setCuttingBorder,
             onBack = { destination = AppDestination.HOME },
             onOpenInfo = { destination = AppDestination.INFO },
         )
@@ -364,19 +359,7 @@ private fun AlbumHomeScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item {
-                val appName = stringResource(R.string.app_name)
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.onPrimaryContainer)) {
-                            append(appName.substringBeforeLast(' '))
-                        }
-                        append(" ")
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
-                            append(appName.substringAfterLast(' '))
-                        }
-                    },
-                    style = MaterialTheme.typography.headlineLarge,
-                )
+                PhotoCardWordmark()
                 Text(
                     pluralStringResource(
                         R.plurals.photo_count,

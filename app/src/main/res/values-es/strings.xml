@@ -68,19 +68,18 @@
     <string name="caption_size_small">Pequeño</string>
     <string name="caption_size_medium">Mediano</string>
     <string name="caption_size_large">Grande</string>
-    <string name="cutting_border_section">BORDE DE CORTE</string>
-    <string name="cutting_border_enabled">Mostrar el borde de corte</string>
     <string name="app_info_section">INFORMACIÓN DE LA APP</string>
     <string name="app_info_entry">Información de la app</string>
     <string name="app_info_title">INFORMACIÓN DE LA APP</string>
     <string name="app_description">Aplicación libre para crear tarjetas fotográficas imprimibles con pies de foto.</string>
+    <string name="open_source_description">PhotoCard Libre es software gratuito y de código abierto.</string>
     <string name="version_label">Versión</string>
     <string name="software_license_label">Licencia del software</string>
     <string name="graphic_resources_license_label">Licencia de los recursos gráficos</string>
     <string name="source_repository_label">Repositorio de código</string>
     <string name="report_issue_label">Informar de un problema</string>
     <string name="privacy_label">Privacidad</string>
-    <string name="privacy_description">Las fotos se procesan en el dispositivo.</string>
+    <string name="privacy_description">Las fotos se procesan localmente en el dispositivo y no se envían a servidores externos.</string>
     <string name="credits_label">Créditos</string>
     <string name="value_to_be_defined">Por definir</string>
 </resources>

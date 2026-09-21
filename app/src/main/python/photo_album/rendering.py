@@ -21,7 +21,6 @@ def _caption(placement: Placement, caption_size: str) -> tuple[list[str], float]
 def create_pdf(
     layout: LayoutResult,
     destination: Path | str,
-    cutting_border: bool = True,
     caption_size: str = config.DEFAULT_CAPTION_SIZE,
 ) -> None:
     if not layout.pages:
@@ -44,13 +43,12 @@ def create_pdf(
                     width=geometry.photo_width, height=geometry.photo_height,
                     preserveAspectRatio=True, mask="auto",
                 )
-                if cutting_border:
-                    canvas.setStrokeColor(black)
-                    canvas.setLineWidth(config.TILE_BORDER_PT)
-                    canvas.rect(
-                        placement.x, tile_bottom, geometry.width, geometry.height,
-                        stroke=1, fill=0,
-                    )
+                canvas.setStrokeColor(black)
+                canvas.setLineWidth(config.TILE_BORDER_PT)
+                canvas.rect(
+                    placement.x, tile_bottom, geometry.width, geometry.height,
+                    stroke=1, fill=0,
+                )
 
                 lines, font_size = _caption(placement, caption_size)
                 if lines:
@@ -77,7 +75,6 @@ def render_preview_page(
     layout: LayoutResult,
     page_index: int,
     dpi: int = config.PREVIEW_DPI,
-    cutting_border: bool = True,
     caption_size: str = config.DEFAULT_CAPTION_SIZE,
 ) -> Image.Image:
     if page_index < 0 or page_index >= len(layout.pages):
@@ -102,9 +99,8 @@ def render_preview_page(
         ph = max(1, round(geometry.photo_height * scale))
         image = open_for_item(placement.item).resize((pw, ph), Image.Resampling.LANCZOS)
         page_image.paste(image, (px, py))
-        if cutting_border:
-            border = max(1, round(config.TILE_BORDER_PT * scale))
-            draw.rectangle((x, y, x + tile_width, y + tile_height), outline="black", width=border)
+        border = max(1, round(config.TILE_BORDER_PT * scale))
+        draw.rectangle((x, y, x + tile_width, y + tile_height), outline="black", width=border)
 
         lines, font_size = _caption(placement, caption_size)
         if lines:

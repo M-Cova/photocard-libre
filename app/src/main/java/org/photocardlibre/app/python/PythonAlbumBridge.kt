@@ -19,7 +19,6 @@ class PythonAlbumBridge(context: Context) {
         photos: List<PhotoEntry>,
         includePdf: Boolean,
         pdfImageSize: PdfImageSize,
-        cuttingBorderEnabled: Boolean,
         pdfCaptionSize: PdfCaptionSize,
     ): Result<RenderResult> = runCatching {
         outputDirectory.mkdirs()
@@ -47,7 +46,6 @@ class PythonAlbumBridge(context: Context) {
                 outputDirectory.absolutePath,
                 includePdf,
                 pdfImageSize.centimeters,
-                cuttingBorderEnabled,
                 pdfCaptionSize.storageValue,
             )
             .toString()

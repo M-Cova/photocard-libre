@@ -101,53 +101,47 @@ class CardSpacingTests(unittest.TestCase):
                 for page in first.pages:
                     self.assert_page_spacing(page)
 
-    def test_all_sizes_captions_and_border_options_keep_card_geometry(self):
+    def test_all_sizes_and_captions_keep_card_geometry(self):
         payload = json.dumps([{
             "path": str(ASSETS / "orizzontale.png"),
             "caption": "FOTO TEST",
         }])
         for max_side_cm in config.SUPPORTED_MAX_PHOTO_SIDE_CM:
             for caption_size in config.CAPTION_FONT_SIZES_PT:
-                for cutting_border in (False, True):
-                    with self.subTest(
-                        max_side_cm=max_side_cm,
-                        caption_size=caption_size,
-                        cutting_border=cutting_border,
-                    ):
-                        observed = []
+                with self.subTest(max_side_cm=max_side_cm, caption_size=caption_size):
+                    observed = []
 
-                        def capture_preview(layout, page_index, **kwargs):
-                            observed.append((layout, kwargs))
-                            return Image.new("RGB", (10, 10), "white")
+                    def capture_preview(layout, page_index, **kwargs):
+                        observed.append((layout, kwargs))
+                        return Image.new("RGB", (10, 10), "white")
 
-                        def capture_pdf(layout, destination, **kwargs):
-                            observed.append((layout, kwargs))
-                            Path(destination).write_bytes(b"%PDF-test")
+                    def capture_pdf(layout, destination, **kwargs):
+                        observed.append((layout, kwargs))
+                        Path(destination).write_bytes(b"%PDF-test")
 
-                        with tempfile.TemporaryDirectory() as directory:
-                            with patch(
-                                "android_bridge.render_preview_page", capture_preview,
-                            ), patch("android_bridge.create_pdf", capture_pdf):
-                                result = json.loads(render_album(
-                                    payload,
-                                    directory,
-                                    True,
-                                    max_side_cm,
-                                    cutting_border,
-                                    caption_size,
-                                ))
+                    with tempfile.TemporaryDirectory() as directory:
+                        with patch(
+                            "android_bridge.render_preview_page", capture_preview,
+                        ), patch("android_bridge.create_pdf", capture_pdf):
+                            result = json.loads(render_album(
+                                payload,
+                                directory,
+                                True,
+                                max_side_cm,
+                                caption_size,
+                            ))
 
-                        self.assertTrue(result["success"], result.get("debug_error"))
-                        self.assertEqual(2, len(observed))
-                        self.assertIs(observed[0][0], observed[1][0])
-                        for layout, kwargs in observed:
-                            geometry = layout.pages[0].placements[0].geometry
-                            self.assertAlmostEqual(
-                                config.cm_to_points(max_side_cm),
-                                max(geometry.photo_width, geometry.photo_height),
-                            )
-                            self.assertEqual(cutting_border, kwargs["cutting_border"])
-                            self.assertEqual(caption_size, kwargs["caption_size"])
+                    self.assertTrue(result["success"], result.get("debug_error"))
+                    self.assertEqual(2, len(observed))
+                    self.assertIs(observed[0][0], observed[1][0])
+                    for layout, kwargs in observed:
+                        geometry = layout.pages[0].placements[0].geometry
+                        self.assertAlmostEqual(
+                            config.cm_to_points(max_side_cm),
+                            max(geometry.photo_width, geometry.photo_height),
+                        )
+                        self.assertNotIn("cutting_border", kwargs)
+                        self.assertEqual(caption_size, kwargs["caption_size"])
 
     def test_preview_and_pdf_receive_the_same_spaced_layout(self):
         payload = json.dumps([

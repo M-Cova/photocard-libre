@@ -45,14 +45,16 @@ internal fun InfoAppScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(vertical = 12.dp),
         ) {
-            Text(
-                text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            PhotoCardWordmark(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
             )
             Text(
                 text = stringResource(R.string.app_description),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+            )
+            Text(
+                text = stringResource(R.string.open_source_description),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
             )

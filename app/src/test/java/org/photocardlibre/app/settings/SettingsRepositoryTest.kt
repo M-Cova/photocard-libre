@@ -55,12 +55,10 @@ class SettingsRepositoryTest {
             )
             repository.setPdfImageSize(PdfImageSize.CM_10)
             repository.setPdfCaptionSize(PdfCaptionSize.LARGE)
-            repository.setCuttingBorderEnabled(false)
             repository.setAppLanguage(AppLanguage.ITALIAN)
 
             assertEquals(PdfImageSize.CM_10, repository.pdfImageSize.first())
             assertEquals(PdfCaptionSize.LARGE, repository.pdfCaptionSize.first())
-            assertEquals(false, repository.cuttingBorderEnabled.first())
         } finally {
             scope.cancel()
         }

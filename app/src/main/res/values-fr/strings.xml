@@ -68,19 +68,18 @@
     <string name="caption_size_small">Petite</string>
     <string name="caption_size_medium">Moyenne</string>
     <string name="caption_size_large">Grande</string>
-    <string name="cutting_border_section">BORDURE DE DÉCOUPE</string>
-    <string name="cutting_border_enabled">Afficher la bordure de découpe</string>
     <string name="app_info_section">INFOS SUR L’APPLICATION</string>
     <string name="app_info_entry">Infos sur l’application</string>
     <string name="app_info_title">INFOS SUR L’APPLICATION</string>
     <string name="app_description">Application libre pour créer des fiches photo imprimables avec légendes.</string>
+    <string name="open_source_description">PhotoCard Libre est un logiciel gratuit et open source.</string>
     <string name="version_label">Version</string>
     <string name="software_license_label">Licence du logiciel</string>
     <string name="graphic_resources_license_label">Licence des ressources graphiques</string>
     <string name="source_repository_label">Dépôt du code source</string>
     <string name="report_issue_label">Signaler un problème</string>
     <string name="privacy_label">Confidentialité</string>
-    <string name="privacy_description">Les photos sont traitées localement sur l’appareil.</string>
+    <string name="privacy_description">Les photos sont traitées localement sur l’appareil et ne sont pas envoyées à des serveurs externes.</string>
     <string name="credits_label">Crédits</string>
     <string name="value_to_be_defined">À définir</string>
 </resources>

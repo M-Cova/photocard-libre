@@ -2,7 +2,9 @@ package org.photocardlibre.app
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -42,6 +44,19 @@ class SettingsNavigationTest {
         openInfo()
         composeRule.onNodeWithTag("schermata_info_app").assertIsDisplayed()
         composeRule.onNodeWithText("APP INFO").assertIsDisplayed()
+        composeRule.onNodeWithTag("photocard_libre_wordmark").assertIsDisplayed()
+        composeRule.onNodeWithText("PhotoCard Libre").assertIsDisplayed()
+        composeRule.onNodeWithText("Free app for creating printable photo cards with captions.")
+            .assertIsDisplayed()
+        composeRule.onNodeWithText("PhotoCard Libre is free and open-source software.")
+            .assertIsDisplayed()
+        composeRule.onNodeWithText("Version").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText(BuildConfig.VERSION_NAME).assertIsDisplayed()
+        composeRule.onNodeWithText("Privacy").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText(
+            "Photos are processed locally on the device and are not sent to external servers.",
+        ).assertIsDisplayed()
+        composeRule.onAllNodesWithText("To be defined").assertCountEquals(5)
     }
 
     @Test
@@ -69,13 +84,14 @@ class SettingsNavigationTest {
             "Small",
             "Medium",
             "Large",
-            "Show the cutting border",
             "App info",
         ).forEach { label ->
             composeRule.onNodeWithText(label).performScrollTo().assertIsDisplayed()
         }
         composeRule.onNodeWithTag("apri_lingua").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("English").assertIsDisplayed()
+        composeRule.onNodeWithText("CUTTING BORDER").assertDoesNotExist()
+        composeRule.onNodeWithText("Show the cutting border").assertDoesNotExist()
     }
 
     @Test

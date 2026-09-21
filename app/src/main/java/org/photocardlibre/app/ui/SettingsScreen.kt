@@ -22,7 +22,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -50,8 +49,6 @@ internal fun SettingsScreen(
     onImageSizeSelected: (PdfImageSize) -> Unit,
     selectedCaptionSize: PdfCaptionSize,
     onCaptionSizeSelected: (PdfCaptionSize) -> Unit,
-    cuttingBorderEnabled: Boolean,
-    onCuttingBorderToggled: (Boolean) -> Unit,
     onBack: () -> Unit,
     onOpenInfo: () -> Unit,
     modifier: Modifier = Modifier,
@@ -131,30 +128,6 @@ internal fun SettingsScreen(
                     selected = selectedCaptionSize == size,
                     onSelect = { onCaptionSizeSelected(size) },
                     radioTestTag = "caption_size_${size.storageValue}",
-                )
-            }
-
-            SettingsDivider()
-            SettingsSectionTitle(R.string.cutting_border_section)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 56.dp)
-                    .clickable(
-                        role = Role.Switch,
-                        onClick = { onCuttingBorderToggled(!cuttingBorderEnabled) },
-                    )
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(R.string.cutting_border_enabled),
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(1f),
-                )
-                Switch(
-                    checked = cuttingBorderEnabled,
-                    onCheckedChange = onCuttingBorderToggled,
                 )
             }
 
