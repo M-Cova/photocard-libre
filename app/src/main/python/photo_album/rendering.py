@@ -18,7 +18,7 @@ def _caption(placement: Placement) -> tuple[list[str], float]:
     return caption_layout(placement.item.caption, width)
 
 
-def create_pdf(layout: LayoutResult, destination: Path | str) -> None:
+def create_pdf(layout: LayoutResult, destination: Path | str, cutting_border: bool = True) -> None:
     if not layout.pages:
         raise ValueError("Aggiungi almeno una fotografia prima di creare il PDF.")
     destination = Path(destination)
@@ -39,12 +39,13 @@ def create_pdf(layout: LayoutResult, destination: Path | str) -> None:
                     width=geometry.photo_width, height=geometry.photo_height,
                     preserveAspectRatio=True, mask="auto",
                 )
-                canvas.setStrokeColor(black)
-                canvas.setLineWidth(config.TILE_BORDER_PT)
-                canvas.rect(
-                    placement.x, tile_bottom, geometry.width, geometry.height,
-                    stroke=1, fill=0,
-                )
+                if cutting_border:
+                    canvas.setStrokeColor(black)
+                    canvas.setLineWidth(config.TILE_BORDER_PT)
+                    canvas.rect(
+                        placement.x, tile_bottom, geometry.width, geometry.height,
+                        stroke=1, fill=0,
+                    )
 
                 lines, font_size = _caption(placement)
                 if lines:
@@ -71,6 +72,7 @@ def render_preview_page(
     layout: LayoutResult,
     page_index: int,
     dpi: int = config.PREVIEW_DPI,
+    cutting_border: bool = True,
 ) -> Image.Image:
     if page_index < 0 or page_index >= len(layout.pages):
         raise IndexError("Pagina di anteprima inesistente.")
@@ -94,8 +96,9 @@ def render_preview_page(
         ph = max(1, round(geometry.photo_height * scale))
         image = open_for_item(placement.item).resize((pw, ph), Image.Resampling.LANCZOS)
         page_image.paste(image, (px, py))
-        border = max(1, round(config.TILE_BORDER_PT * scale))
-        draw.rectangle((x, y, x + tile_width, y + tile_height), outline="black", width=border)
+        if cutting_border:
+            border = max(1, round(config.TILE_BORDER_PT * scale))
+            draw.rectangle((x, y, x + tile_width, y + tile_height), outline="black", width=border)
 
         lines, font_size = _caption(placement)
         if lines:

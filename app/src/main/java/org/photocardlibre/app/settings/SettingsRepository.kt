@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import java.io.IOException
@@ -33,7 +34,22 @@ class SettingsRepository internal constructor(
         }
     }
 
+    val cuttingBorderEnabled: Flow<Boolean> = dataStore.data
+        .catch { error ->
+            if (error is IOException) emit(emptyPreferences()) else throw error
+        }
+        .map { preferences ->
+            preferences[CUTTING_BORDER_ENABLED] ?: true
+        }
+
+    suspend fun setCuttingBorderEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[CUTTING_BORDER_ENABLED] = enabled
+        }
+    }
+
     private companion object {
+        val CUTTING_BORDER_ENABLED = booleanPreferencesKey("cutting_border_enabled")
         val PDF_IMAGE_SIZE_CM = intPreferencesKey("pdf_image_size_cm")
     }
 }

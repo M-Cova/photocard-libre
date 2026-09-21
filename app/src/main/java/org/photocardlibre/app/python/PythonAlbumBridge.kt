@@ -18,6 +18,7 @@ class PythonAlbumBridge(context: Context) {
         photos: List<PhotoEntry>,
         includePdf: Boolean,
         pdfImageSize: PdfImageSize,
+        cuttingBorderEnabled: Boolean,
     ): Result<RenderResult> = runCatching {
         outputDirectory.mkdirs()
         val payload = JSONArray().apply {
@@ -44,6 +45,7 @@ class PythonAlbumBridge(context: Context) {
                 outputDirectory.absolutePath,
                 includePdf,
                 pdfImageSize.centimeters,
+                cuttingBorderEnabled,
             )
             .toString()
         val json = JSONObject(rawResult)

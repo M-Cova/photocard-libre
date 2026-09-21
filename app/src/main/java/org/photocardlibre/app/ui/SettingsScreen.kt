@@ -47,13 +47,14 @@ import org.photocardlibre.app.settings.PdfImageSize
 internal fun SettingsScreen(
     selectedImageSize: PdfImageSize,
     onImageSizeSelected: (PdfImageSize) -> Unit,
+    cuttingBorderEnabled: Boolean,
+    onCuttingBorderToggled: (Boolean) -> Unit,
     onBack: () -> Unit,
     onOpenInfo: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var selectedLanguage by rememberSaveable { mutableIntStateOf(R.string.language_system) }
     var selectedCaptionSize by rememberSaveable { mutableIntStateOf(R.string.caption_size_medium) }
-    var cuttingBorderEnabled by rememberSaveable { mutableStateOf(true) }
 
     BackHandler(onBack = onBack)
 
@@ -134,7 +135,7 @@ internal fun SettingsScreen(
                     .heightIn(min = 56.dp)
                     .clickable(
                         role = Role.Switch,
-                        onClick = { cuttingBorderEnabled = !cuttingBorderEnabled },
+                        onClick = { onCuttingBorderToggled(!cuttingBorderEnabled) },
                     )
                     .padding(horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -146,7 +147,7 @@ internal fun SettingsScreen(
                 )
                 Switch(
                     checked = cuttingBorderEnabled,
-                    onCheckedChange = null,
+                    onCheckedChange = onCuttingBorderToggled,
                 )
             }
 

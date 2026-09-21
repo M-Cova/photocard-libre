@@ -31,6 +31,7 @@ data class AlbumUiState(
     val savedPdfUri: String? = null,
     val pdfSaving: Boolean = false,
     val pdfImageSize: PdfImageSize = PdfImageSize.DEFAULT,
+    val cuttingBorderEnabled: Boolean = true,
 ) {
     val hasSavedPdfActions: Boolean
         get() = !pdfSaving && !pdfPath.isNullOrBlank() && !savedPdfUri.isNullOrBlank()
@@ -51,10 +52,17 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
                 state = state.copy(pdfImageSize = savedSize)
             }
         }
+        viewModelScope.launch {
+            settings.cuttingBorderEnabled.collect { enabled ->
+                state = state.copy(cuttingBorderEnabled = enabled)
+            }
+        }
     }
 
     fun selectPdfImageSize(size: PdfImageSize) {
         if (size == state.pdfImageSize) return
+
+        val oldBorder = state.cuttingBorderEnabled
         state = state.copy(
             pdfImageSize = size,
             previewPaths = emptyList(),
@@ -62,6 +70,12 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
             savedPdfUri = null,
         )
         viewModelScope.launch { settings.setPdfImageSize(size) }
+    }
+
+    fun setCuttingBorder(enabled: Boolean) {
+        if (enabled == state.cuttingBorderEnabled) return
+        state = state.copy(cuttingBorderEnabled = enabled)
+        viewModelScope.launch { settings.setCuttingBorderEnabled(enabled) }
     }
 
     fun importUris(uris: List<Uri>) {
@@ -126,9 +140,10 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
         )
         val photos = state.album.photos
         val pdfImageSize = state.pdfImageSize
+        val cuttingBorderEnabled = state.cuttingBorderEnabled
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO) {
-                python.render(photos, includePdf, pdfImageSize)
+                python.render(photos, includePdf, pdfImageSize, cuttingBorderEnabled)
             }
             result.fold(
                 onSuccess = { rendered ->
