@@ -41,6 +41,10 @@
     <string name="message_importing_photos">A importar fotografias…</string>
     <string name="message_no_photos_opened">Não foi possível abrir as fotografias selecionadas. Utilize JPEG ou PNG.</string>
     <string name="message_some_photos_not_opened">Não foi possível abrir algumas fotografias. Utilize JPEG ou PNG.</string>
+    <string name="message_import_file_size_limit">Uma fotografia excede o limite de 30 MB e não foi importada.</string>
+    <string name="message_import_pixel_limit">Uma fotografia excede o limite de 50 megapíxeis e não foi importada.</string>
+    <string name="message_import_session_size_limit">Foi atingido o limite de importação de 300 MB para esta sessão. A fotografia não foi importada.</string>
+    <string name="message_import_photo_count_limit">Foi atingido o limite de 50 fotografias para esta sessão.</string>
     <string name="message_caption_max_words">A legenda pode ter até 4 palavras.</string>
     <string name="message_add_photo_first">Adicione pelo menos uma fotografia.</string>
     <string name="message_creating_pdf">A criar PDF…</string>

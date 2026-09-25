@@ -41,6 +41,10 @@
     <string name="message_importing_photos">Importation des photos…</string>
     <string name="message_no_photos_opened">Impossible d’ouvrir les photos sélectionnées. Utilisez JPEG ou PNG.</string>
     <string name="message_some_photos_not_opened">Impossible d’ouvrir certaines photos. Utilisez JPEG ou PNG.</string>
+    <string name="message_import_file_size_limit">Une photo dépasse la limite de 30 Mo et n’a pas été importée.</string>
+    <string name="message_import_pixel_limit">Une photo dépasse la limite de 50 mégapixels et n’a pas été importée.</string>
+    <string name="message_import_session_size_limit">La limite d’importation de 300 Mo pour cette session est atteinte. La photo n’a pas été importée.</string>
+    <string name="message_import_photo_count_limit">La limite de 50 photos pour cette session est atteinte.</string>
     <string name="message_caption_max_words">La légende peut contenir 4 mots maximum.</string>
     <string name="message_add_photo_first">Ajoutez au moins une photo.</string>
     <string name="message_creating_pdf">Création du PDF…</string>

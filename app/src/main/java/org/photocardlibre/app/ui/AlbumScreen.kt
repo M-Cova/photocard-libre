@@ -48,6 +48,7 @@ import org.photocardlibre.app.export.AutomaticSaveResult
 import org.photocardlibre.app.export.PdfExport
 import org.photocardlibre.app.model.CropRect
 import org.photocardlibre.app.model.PhotoEntry
+import org.photocardlibre.app.storage.ImportLimits
 import java.util.Locale
 
 private enum class AppDestination { ALBUM, SETTINGS, INFO, LANGUAGE, MEASUREMENT_UNIT }
@@ -106,7 +107,7 @@ private fun AlbumWorkspace(viewModel: AlbumViewModel, onOpenSettings: () -> Unit
     var pdfNameError by rememberSaveable { mutableStateOf<String?>(null) }
 
     val photoPicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickMultipleVisualMedia(maxItems = 50),
+        ActivityResultContracts.PickMultipleVisualMedia(maxItems = ImportLimits.MAX_SESSION_PHOTOS),
     ) { uris -> viewModel.importUris(uris, context.getString(R.string.default_photo_name)) }
     val addPhotos = {
         photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))

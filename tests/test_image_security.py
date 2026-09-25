@@ -5,7 +5,18 @@ from pathlib import Path
 
 from PIL import Image
 
-from photo_album.images import ImageLoadError, load_photo, open_normalized, validate_user_image
+from photo_album import config
+from photo_album.images import (
+    IMPORT_TOO_MANY_PIXELS,
+    IMPORT_VALID,
+    ImageLoadError,
+    ImagePixelLimitError,
+    _check_pixel_limit,
+    load_photo,
+    open_normalized,
+    validate_user_image,
+    validate_user_image_for_import,
+)
 
 
 def minimal_psd() -> bytes:
@@ -22,6 +33,7 @@ class ImageSecurityTests(unittest.TestCase):
             Image.new("RGB", (16, 12), "red").save(path, "JPEG")
 
             validate_user_image(path)
+            self.assertEqual(IMPORT_VALID, validate_user_image_for_import(path))
             self.assertEqual((16, 12), open_normalized(path).size)
 
     def test_valid_png_is_accepted(self):
@@ -30,7 +42,31 @@ class ImageSecurityTests(unittest.TestCase):
             Image.new("RGBA", (12, 16), (0, 0, 255, 128)).save(path, "PNG")
 
             validate_user_image(path)
+            self.assertEqual(IMPORT_VALID, validate_user_image_for_import(path))
             self.assertEqual((12, 16), open_normalized(path).size)
+
+    def test_image_just_below_pixel_limit_is_accepted_before_decode(self):
+        image = Image.new("1", (10_000, 4_999))
+        try:
+            self.assertEqual(config.MAX_IMPORT_IMAGE_PIXELS - 10_000, image.width * image.height)
+            _check_pixel_limit(image)
+        finally:
+            image.close()
+
+    def test_image_just_above_pixel_limit_is_rejected_before_decode(self):
+        image = Image.new("1", (10_000, 5_001))
+        try:
+            self.assertEqual(config.MAX_IMPORT_IMAGE_PIXELS + 10_000, image.width * image.height)
+            with self.assertRaises(ImagePixelLimitError):
+                _check_pixel_limit(image)
+        finally:
+            image.close()
+
+    def test_import_validation_reports_pixel_limit_without_traceback(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "large.png"
+            Image.new("1", (10_000, 5_001)).save(path, "PNG")
+            self.assertEqual(IMPORT_TOO_MANY_PIXELS, validate_user_image_for_import(path))
 
     def test_psd_renamed_as_jpeg_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:

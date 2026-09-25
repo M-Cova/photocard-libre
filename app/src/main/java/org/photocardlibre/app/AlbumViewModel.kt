@@ -13,6 +13,7 @@ import org.photocardlibre.app.model.AlbumState
 import org.photocardlibre.app.model.CropRect
 import org.photocardlibre.app.python.PythonAlbumBridge
 import org.photocardlibre.app.storage.PhotoCacheAdapter
+import org.photocardlibre.app.storage.ImportRejection
 import org.photocardlibre.app.settings.PdfImageSize
 import org.photocardlibre.app.settings.PdfCaptionSize
 import org.photocardlibre.app.settings.SettingsRepository
@@ -135,8 +136,16 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
                 return@launch
             }
             val message = when {
+                ImportRejection.SESSION_COUNT_EXCEEDED in result.rejections ->
+                    UiMessage(R.string.message_import_photo_count_limit)
+                ImportRejection.SESSION_BYTES_EXCEEDED in result.rejections ->
+                    UiMessage(R.string.message_import_session_size_limit)
+                ImportRejection.FILE_TOO_LARGE in result.rejections ->
+                    UiMessage(R.string.message_import_file_size_limit)
+                ImportRejection.IMAGE_TOO_LARGE in result.rejections ->
+                    UiMessage(R.string.message_import_pixel_limit)
                 result.photos.isEmpty() -> UiMessage(R.string.message_no_photos_opened)
-                result.rejectedCount > 0 -> UiMessage(R.string.message_some_photos_not_opened)
+                result.rejections.isNotEmpty() -> UiMessage(R.string.message_some_photos_not_opened)
                 else -> null
             }
             state = state.copy(

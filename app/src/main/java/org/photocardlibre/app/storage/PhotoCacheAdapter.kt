@@ -6,52 +6,65 @@ import android.provider.OpenableColumns
 import com.chaquo.python.Python
 import org.photocardlibre.app.model.PhotoEntry
 import java.io.File
-import java.io.IOException
 import java.util.UUID
 
-data class ImportResult(val photos: List<PhotoEntry>, val rejectedCount: Int)
+data class ImportResult(
+    val photos: List<PhotoEntry>,
+    val rejections: List<ImportRejection>,
+)
 
 class PhotoCacheAdapter(private val context: Context) {
     private val inputDirectory = File(context.cacheDir, "photo_inputs")
+    private val importGuard = PhotoImportGuard()
 
     fun startFreshSession() {
         inputDirectory.deleteRecursively()
         check(inputDirectory.mkdirs() || inputDirectory.isDirectory)
+        importGuard.reset()
     }
 
     fun importUris(uris: List<Uri>, defaultDisplayName: String): ImportResult {
         inputDirectory.mkdirs()
         val photos = mutableListOf<PhotoEntry>()
-        var rejected = 0
+        val rejections = mutableListOf<ImportRejection>()
         for (uri in uris) {
-            var destination: File? = null
             try {
                 val extension = extensionForMime(context.contentResolver.getType(uri))
                 if (extension == null) {
-                    rejected += 1
+                    rejections += ImportRejection.UNSUPPORTED_OR_INVALID
                     continue
                 }
                 val id = UUID.randomUUID().toString()
+                val resolvedDisplayName = displayName(uri) ?: defaultDisplayName
                 val outputFile = File(inputDirectory, "$id.$extension")
-                destination = outputFile
-                val input = context.contentResolver.openInputStream(uri)
-                    ?: throw IOException("ContentResolver non ha restituito uno stream")
-                input.use { source -> outputFile.outputStream().use { source.copyTo(it) } }
-                if (outputFile.length() == 0L) throw IOException("File vuoto")
-                Python.getInstance()
-                    .getModule("photo_album.images")
-                    .callAttr("validate_user_image", outputFile.absolutePath)
-                photos += PhotoEntry(
-                    id = id,
-                    localPath = outputFile.absolutePath,
-                    displayName = displayName(uri) ?: defaultDisplayName,
-                )
+                when (val result = importGuard.importFile(
+                    destination = outputFile,
+                    openSource = { context.contentResolver.openInputStream(uri) },
+                    validate = ::validateImage,
+                )) {
+                    is GuardedImportResult.Success -> photos += PhotoEntry(
+                        id = id,
+                        localPath = outputFile.absolutePath,
+                        displayName = resolvedDisplayName,
+                    )
+                    is GuardedImportResult.Rejected -> rejections += result.reason
+                }
             } catch (_: Exception) {
-                destination?.delete()
-                rejected += 1
+                rejections += ImportRejection.UNSUPPORTED_OR_INVALID
             }
         }
-        return ImportResult(photos, rejected)
+        return ImportResult(photos, rejections)
+    }
+
+    private fun validateImage(file: File): ImageValidation = when (
+        Python.getInstance()
+            .getModule("photo_album.images")
+            .callAttr("validate_user_image_for_import", file.absolutePath)
+            .toString()
+    ) {
+        "valid" -> ImageValidation.VALID
+        "too_many_pixels" -> ImageValidation.TOO_MANY_PIXELS
+        else -> ImageValidation.INVALID
     }
 
     fun delete(photo: PhotoEntry) {

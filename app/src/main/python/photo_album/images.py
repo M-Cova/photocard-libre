@@ -10,10 +10,24 @@ from .config import SUPPORTED_EXTENSIONS
 from .models import NormalizedCrop, PhotoItem
 
 SUPPORTED_IMAGE_FORMATS = ("JPEG", "PNG")
+IMPORT_VALID = "valid"
+IMPORT_INVALID = "invalid"
+IMPORT_TOO_MANY_PIXELS = "too_many_pixels"
 
 
 class ImageLoadError(ValueError):
     pass
+
+
+class ImagePixelLimitError(ImageLoadError):
+    pass
+
+
+def _check_pixel_limit(image: Image.Image) -> None:
+    if image.width <= 0 or image.height <= 0:
+        raise ImageLoadError("Dimensioni immagine non valide.")
+    if image.width * image.height > config.MAX_IMPORT_IMAGE_PIXELS:
+        raise ImagePixelLimitError("L'immagine supera il limite di pixel.")
 
 
 def open_normalized(path: Path | str) -> Image.Image:
@@ -21,6 +35,7 @@ def open_normalized(path: Path | str) -> Image.Image:
         with Image.open(path, formats=SUPPORTED_IMAGE_FORMATS) as source:
             if source.format not in SUPPORTED_IMAGE_FORMATS:
                 raise ImageLoadError("Formato immagine non supportato. Usa JPEG o PNG.")
+            _check_pixel_limit(source)
             image = ImageOps.exif_transpose(source)
             image.load()
             if image.mode not in ("RGB", "L"):
@@ -45,6 +60,17 @@ def validate_user_image(path: Path | str) -> None:
     """Decodifica completamente un input utente usando soltanto JPEG e PNG."""
     image = open_normalized(path)
     image.close()
+
+
+def validate_user_image_for_import(path: Path | str) -> str:
+    """Esito stabile per il confine Kotlin, senza traceback per input rifiutati."""
+    try:
+        validate_user_image(path)
+    except ImagePixelLimitError:
+        return IMPORT_TOO_MANY_PIXELS
+    except ImageLoadError:
+        return IMPORT_INVALID
+    return IMPORT_VALID
 
 
 def crop_image(image: Image.Image, crop: NormalizedCrop | None) -> Image.Image:

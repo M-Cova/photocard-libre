@@ -50,4 +50,9 @@ PREVIEW_DPI = 92
 # A 5 cm, 300 DPI richiedono circa 591 pixel. Il margine fino a 750 pixel
 # evita perdita visibile senza incorporare nel PDF i raster originali enormi.
 PDF_IMAGE_MAX_SIDE_PX = 750
+
+# Limiti degli input esterni. Il controllo dei byte e del numero di file vive
+# nel confine Android content://; questo limite viene applicato da Pillow prima
+# della decodifica completa.
+MAX_IMPORT_IMAGE_PIXELS = 50_000_000
 PDF_IMAGE_JPEG_QUALITY = 88

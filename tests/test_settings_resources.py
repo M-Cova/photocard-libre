@@ -7,6 +7,21 @@ RESOURCES = Path(__file__).parents[1] / "app/src/main/res"
 
 
 class SettingsResourceTests(unittest.TestCase):
+    def test_import_limit_errors_exist_in_every_supported_language(self):
+        keys = {
+            "message_import_file_size_limit",
+            "message_import_pixel_limit",
+            "message_import_session_size_limit",
+            "message_import_photo_count_limit",
+        }
+
+        for directory in ("values-it", "values-en", "values-es", "values-de", "values-fr", "values-pt"):
+            with self.subTest(directory=directory):
+                root = ElementTree.parse(RESOURCES / directory / "strings.xml").getroot()
+                strings = {item.attrib["name"]: item.text for item in root.findall("string")}
+                self.assertTrue(keys.issubset(strings))
+                self.assertTrue(all(strings[key] for key in keys))
+
     def test_measurement_unit_strings_exist_in_every_supported_language(self):
         expected = {
             "values-it": ("UNITÀ DI MISURA", "Centimetri", "Pollici"),

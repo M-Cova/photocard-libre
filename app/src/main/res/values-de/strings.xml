@@ -39,6 +39,10 @@
     <string name="message_importing_photos">Fotos werden importiert…</string>
     <string name="message_no_photos_opened">Die ausgewählten Fotos konnten nicht geöffnet werden. Verwende JPEG oder PNG.</string>
     <string name="message_some_photos_not_opened">Einige Fotos konnten nicht geöffnet werden. Verwende JPEG oder PNG.</string>
+    <string name="message_import_file_size_limit">Ein Foto überschreitet das Limit von 30 MB und wurde nicht importiert.</string>
+    <string name="message_import_pixel_limit">Ein Foto überschreitet das Limit von 50 Megapixeln und wurde nicht importiert.</string>
+    <string name="message_import_session_size_limit">Das Importlimit von 300 MB für diese Sitzung wurde erreicht. Das Foto wurde nicht importiert.</string>
+    <string name="message_import_photo_count_limit">Das Limit von 50 Fotos für diese Sitzung wurde erreicht.</string>
     <string name="message_caption_max_words">Die Beschriftung darf höchstens 4 Wörter enthalten.</string>
     <string name="message_add_photo_first">Füge mindestens ein Foto hinzu.</string>
     <string name="message_creating_pdf">PDF wird erstellt…</string>
