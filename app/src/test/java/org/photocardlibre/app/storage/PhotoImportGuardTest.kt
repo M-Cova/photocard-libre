@@ -107,6 +107,25 @@ class PhotoImportGuardTest {
     }
 
     @Test
+    fun failedPartialFileDeletionDoesNotCrashAndIsReportedForLaterRetry() {
+        var cleanupFailures = 0
+        val guard = PhotoImportGuard(
+            maxFileBytes = 1,
+            maxSessionBytes = 10,
+            maxSessionPhotos = 1,
+            deleteFile = { false },
+            onCleanupFailure = { cleanupFailures += 1 },
+        )
+        val destination = newDestination("undeletable-partial.jpg")
+
+        val result = importBytes(guard, destination, 2)
+
+        assertEquals(GuardedImportResult.Rejected(ImportRejection.FILE_TOO_LARGE), result)
+        assertTrue(destination.exists())
+        assertEquals(1, cleanupFailures)
+    }
+
+    @Test
     fun photoCountIsCumulativeForTheSessionAndResettable() {
         val guard = testGuard(maxSessionPhotos = 1)
         assertTrue(importBytes(guard, newDestination("one.jpg"), 1) is GuardedImportResult.Success)

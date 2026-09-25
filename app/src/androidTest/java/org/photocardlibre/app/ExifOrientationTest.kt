@@ -166,7 +166,7 @@ class ExifOrientationTest {
             block(file)
         } finally {
             bitmap.recycle()
-            file.delete()
+            assertTrue(file.delete() || !file.exists())
         }
     }
 

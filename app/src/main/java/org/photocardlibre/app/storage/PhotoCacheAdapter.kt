@@ -3,6 +3,7 @@ package org.photocardlibre.app.storage
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.Log
 import com.chaquo.python.Python
 import org.photocardlibre.app.model.PhotoEntry
 import java.io.File
@@ -14,12 +15,18 @@ data class ImportResult(
 )
 
 class PhotoCacheAdapter(private val context: Context) {
-    private val inputDirectory = File(context.cacheDir, "photo_inputs")
-    private val importGuard = PhotoImportGuard()
+    private val privateCache = PrivateCacheManager(context.cacheDir) {
+        Log.w(TAG, "Pulizia cache privata incompleta; nuovo tentativo al prossimo avvio")
+    }
+    private val inputDirectory = privateCache.inputDirectory
+    private val importGuard = PhotoImportGuard(
+        onCleanupFailure = {
+            Log.w(TAG, "Pulizia di un'importazione incompleta non riuscita")
+        },
+    )
 
     fun startFreshSession() {
-        inputDirectory.deleteRecursively()
-        check(inputDirectory.mkdirs() || inputDirectory.isDirectory)
+        privateCache.startFreshSession()
         importGuard.reset()
     }
 
@@ -69,7 +76,14 @@ class PhotoCacheAdapter(private val context: Context) {
 
     fun delete(photo: PhotoEntry) {
         val file = File(photo.localPath)
-        if (file.parentFile == inputDirectory) file.delete()
+        if (
+            file.parentFile == inputDirectory &&
+            file.exists() &&
+            !file.delete() &&
+            file.exists()
+        ) {
+            Log.w(TAG, "Pulizia di una fotografia temporanea non riuscita")
+        }
     }
 
     private fun displayName(uri: Uri): String? =
@@ -80,6 +94,8 @@ class PhotoCacheAdapter(private val context: Context) {
             }
 
     companion object {
+        private const val TAG = "PhotoCardCache"
+
         fun extensionForMime(mimeType: String?): String? = when (mimeType?.lowercase()) {
             "image/jpeg", "image/jpg" -> "jpg"
             "image/png" -> "png"

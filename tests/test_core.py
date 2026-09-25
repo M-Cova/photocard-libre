@@ -126,6 +126,45 @@ class AndroidCoreTests(unittest.TestCase):
             self.assertIsNone(result["pdf_path"])
             self.assertEqual(1, len(result["preview_paths"]))
 
+    def test_failed_render_removes_partial_outputs_and_preserves_published_files(self):
+        payload = json.dumps([{
+            "path": str(ASSETS / "orizzontale.png"),
+            "caption": "ERRORE CONTROLLATO",
+        }])
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            published_preview = output / "anteprima-1.png"
+            published_pdf = output / "foto-album.pdf"
+            published_preview.write_bytes(b"old-preview")
+            published_pdf.write_bytes(b"%PDF-old")
+
+            def fail_after_partial_pdf(layout, destination, caption_size="medium"):
+                Path(destination).write_bytes(b"partial")
+                raise OSError("simulated write failure")
+
+            with patch("android_bridge.create_pdf", fail_after_partial_pdf):
+                result = json.loads(render_album(payload, directory, True))
+
+            self.assertFalse(result["success"])
+            self.assertEqual(b"old-preview", published_preview.read_bytes())
+            self.assertEqual(b"%PDF-old", published_pdf.read_bytes())
+            self.assertFalse((output / ".render-in-progress").exists())
+
+    def test_successful_render_removes_obsolete_preview_without_accumulating(self):
+        payload = json.dumps([{
+            "path": str(ASSETS / "quadrata.png"),
+            "caption": "NUOVA ANTEPRIMA",
+        }])
+        with tempfile.TemporaryDirectory() as directory:
+            obsolete = Path(directory) / "anteprima-99.png"
+            obsolete.write_bytes(b"obsolete")
+
+            result = json.loads(render_album(payload, directory, False))
+
+            self.assertTrue(result["success"], result.get("debug_error"))
+            self.assertFalse(obsolete.exists())
+            self.assertEqual(1, len(list(Path(directory).glob("anteprima-*.png"))))
+
 
 if __name__ == "__main__":
     unittest.main()

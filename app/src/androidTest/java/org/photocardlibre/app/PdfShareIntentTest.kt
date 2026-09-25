@@ -53,7 +53,7 @@ class PdfShareIntentTest {
             assertEquals("content", uri?.scheme)
             assertTrue(intent.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0)
         } finally {
-            pdf.delete()
+            assertTrue(pdf.delete() || !pdf.exists())
         }
     }
 }

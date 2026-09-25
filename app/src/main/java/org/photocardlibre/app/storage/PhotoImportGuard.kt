@@ -30,6 +30,8 @@ class PhotoImportGuard(
     private val maxFileBytes: Long = ImportLimits.MAX_FILE_BYTES,
     private val maxSessionBytes: Long = ImportLimits.MAX_SESSION_BYTES,
     private val maxSessionPhotos: Int = ImportLimits.MAX_SESSION_PHOTOS,
+    private val deleteFile: (File) -> Boolean = { it.delete() },
+    private val onCleanupFailure: () -> Unit = {},
 ) {
     private var importedBytes = 0L
     private var importedPhotos = 0
@@ -95,7 +97,12 @@ class PhotoImportGuard(
         destination: File,
         reason: ImportRejection,
     ): GuardedImportResult.Rejected {
-        destination.delete()
+        val deleted = try {
+            !destination.exists() || deleteFile(destination) || !destination.exists()
+        } catch (_: Exception) {
+            false
+        }
+        if (!deleted) onCleanupFailure()
         return GuardedImportResult.Rejected(reason)
     }
 
