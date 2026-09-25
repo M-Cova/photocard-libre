@@ -1,9 +1,9 @@
 package org.photocardlibre.app.storage
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.OpenableColumns
+import com.chaquo.python.Python
 import org.photocardlibre.app.model.PhotoEntry
 import java.io.File
 import java.io.IOException
@@ -38,11 +38,9 @@ class PhotoCacheAdapter(private val context: Context) {
                     ?: throw IOException("ContentResolver non ha restituito uno stream")
                 input.use { source -> outputFile.outputStream().use { source.copyTo(it) } }
                 if (outputFile.length() == 0L) throw IOException("File vuoto")
-                val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-                BitmapFactory.decodeFile(outputFile.absolutePath, bounds)
-                if (bounds.outWidth <= 0 || bounds.outHeight <= 0) {
-                    throw IOException("Immagine non decodificabile")
-                }
+                Python.getInstance()
+                    .getModule("photo_album.images")
+                    .callAttr("validate_user_image", outputFile.absolutePath)
                 photos += PhotoEntry(
                     id = id,
                     localPath = outputFile.absolutePath,

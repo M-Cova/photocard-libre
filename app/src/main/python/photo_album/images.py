@@ -9,6 +9,8 @@ from . import config
 from .config import SUPPORTED_EXTENSIONS
 from .models import NormalizedCrop, PhotoItem
 
+SUPPORTED_IMAGE_FORMATS = ("JPEG", "PNG")
+
 
 class ImageLoadError(ValueError):
     pass
@@ -16,7 +18,9 @@ class ImageLoadError(ValueError):
 
 def open_normalized(path: Path | str) -> Image.Image:
     try:
-        with Image.open(path) as source:
+        with Image.open(path, formats=SUPPORTED_IMAGE_FORMATS) as source:
+            if source.format not in SUPPORTED_IMAGE_FORMATS:
+                raise ImageLoadError("Formato immagine non supportato. Usa JPEG o PNG.")
             image = ImageOps.exif_transpose(source)
             image.load()
             if image.mode not in ("RGB", "L"):
@@ -32,7 +36,15 @@ def open_normalized(path: Path | str) -> Image.Image:
                 image = image.copy()
             return image
     except Exception as exc:
-        raise ImageLoadError(f"Impossibile leggere l'immagine '{Path(path).name}'.") from exc
+        if isinstance(exc, ImageLoadError):
+            raise
+        raise ImageLoadError("Impossibile leggere l'immagine. Usa JPEG o PNG.") from exc
+
+
+def validate_user_image(path: Path | str) -> None:
+    """Decodifica completamente un input utente usando soltanto JPEG e PNG."""
+    image = open_normalized(path)
+    image.close()
 
 
 def crop_image(image: Image.Image, crop: NormalizedCrop | None) -> Image.Image:

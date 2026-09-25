@@ -37,7 +37,10 @@ La barra inferiore usa `navigationBarsPadding()`: i tre comandi principali ricev
 ## Dipendenze verificate dal build
 
 - Chaquopy 17.0.0 e Python 3.12;
-- Pillow 11.0.0, wheel Android CPython 3.12 `arm64-v8a`;
+- Pillow 11.0.0, wheel Android CPython 3.12 `arm64-v8a`. È la versione più
+  recente pubblicata nel repository wheel Chaquopy per questa combinazione;
+  le release Pillow successive non hanno un wheel Android compatibile e non
+  vengono forzate da sorgente;
 - ReportLab 5.0.1;
 - Compose BOM 2025.01.01;
 - minSdk 24, target/compileSdk 35, solo ABI `arm64-v8a`.

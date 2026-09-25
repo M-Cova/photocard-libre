@@ -2,7 +2,6 @@
 
 import json
 from pathlib import Path
-import traceback
 
 from photo_album import config
 from photo_album.images import ImageLoadError, load_photo
@@ -75,9 +74,8 @@ def render_album(
 
 
 def _failure(user_error: str, error: Exception) -> str:
-    traceback.print_exc()
     return json.dumps({
         "success": False,
         "user_error": user_error,
-        "debug_error": f"{type(error).__name__}: {error}",
+        "debug_error": type(error).__name__,
     })
