@@ -90,7 +90,7 @@ def render_album(
     except ImageLoadError as error:
         return _failure("Non è stato possibile aprire questa fotografia.", error)
     except ValueError as error:
-        return _failure(str(error), error)
+        return _failure("Dati di input non validi.", error)
     except Exception as error:
         return _failure("Errore durante la creazione del PDF.", error)
     finally:

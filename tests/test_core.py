@@ -115,6 +115,25 @@ class AndroidCoreTests(unittest.TestCase):
             self.assertFalse(result["success"])
             self.assertIn("massimo 4 parole", result["user_error"])
 
+    def test_failure_response_does_not_expose_exception_details(self):
+        private_details = "content://private/42 /data/user/0/photo.jpg DIDASCALIA RISERVATA"
+        payload = json.dumps([{
+            "path": str(ASSETS / "orizzontale.png"),
+            "caption": "TEST SICUREZZA",
+        }])
+
+        with tempfile.TemporaryDirectory() as directory:
+            with patch(
+                "android_bridge.create_layout",
+                side_effect=ValueError(private_details),
+            ):
+                result = json.loads(render_album(payload, directory, False))
+
+        self.assertFalse(result["success"])
+        self.assertEqual("Dati di input non validi.", result["user_error"])
+        self.assertEqual("ValueError", result["debug_error"])
+        self.assertNotIn(private_details, json.dumps(result))
+
     def test_preview_only_does_not_publish_a_pdf_path(self):
         payload = json.dumps([{
             "path": str(ASSETS / "orizzontale.png"),
