@@ -1,8 +1,32 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.chaquo.python")
+}
+
+val releaseSigningProperties = Properties()
+val releaseSigningPropertiesFile = rootProject.file("keystore.properties")
+if (releaseSigningPropertiesFile.isFile) {
+    releaseSigningPropertiesFile.inputStream().use(releaseSigningProperties::load)
+}
+
+fun releaseSigningValue(propertyName: String, environmentName: String): String? =
+    System.getenv(environmentName)?.takeIf(String::isNotBlank)
+        ?: releaseSigningProperties.getProperty(propertyName)?.takeIf(String::isNotBlank)
+
+val releaseSigningValues = mapOf(
+    "storeFile" to releaseSigningValue("storeFile", "PHOTOCARD_RELEASE_KEYSTORE"),
+    "storePassword" to releaseSigningValue("storePassword", "PHOTOCARD_RELEASE_STORE_PASSWORD"),
+    "keyAlias" to releaseSigningValue("keyAlias", "PHOTOCARD_RELEASE_KEY_ALIAS"),
+    "keyPassword" to releaseSigningValue("keyPassword", "PHOTOCARD_RELEASE_KEY_PASSWORD"),
+)
+val releaseSigningIsConfigured = releaseSigningValues.values.all { it != null }
+check(releaseSigningValues.values.none { it != null } || releaseSigningIsConfigured) {
+    "Release signing is only partially configured. Provide all four values via " +
+        "keystore.properties or PHOTOCARD_RELEASE_* environment variables."
 }
 
 base {
@@ -26,9 +50,25 @@ android {
         }
     }
 
+    signingConfigs {
+        if (releaseSigningIsConfigured) {
+            create("release") {
+                storeFile = rootProject.file(releaseSigningValues.getValue("storeFile")!!)
+                storePassword = releaseSigningValues.getValue("storePassword")
+                keyAlias = releaseSigningValues.getValue("keyAlias")
+                keyPassword = releaseSigningValues.getValue("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
+        debug {
+            isDebuggable = true
+        }
         release {
+            isDebuggable = false
             isMinifyEnabled = false
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 
@@ -74,7 +114,6 @@ dependencies {
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     testImplementation("junit:junit:4.13.2")
