@@ -43,19 +43,31 @@ class PdfImageOptimizationTests(unittest.TestCase):
                 self.assertEqual((320, 200), optimized.size)
             self.assertEqual(original_bytes, source.read_bytes())
 
-    def test_applies_exif_orientation_before_resize(self):
+    def test_applies_exif_orientations_before_preview_and_pdf_optimization(self):
         with tempfile.TemporaryDirectory() as directory:
-            source = Path(directory) / "rotated.jpg"
-            output = Path(directory) / "optimized.jpg"
-            image = Image.new("RGB", (120, 60), "red")
-            exif = image.getexif()
-            exif[274] = 6
-            image.save(source, exif=exif)
+            for orientation, expected_size in (
+                (1, (120, 60)),
+                (3, (120, 60)),
+                (6, (60, 120)),
+                (8, (60, 120)),
+            ):
+                with self.subTest(orientation=orientation):
+                    source = Path(directory) / f"orientation-{orientation}.jpg"
+                    output = Path(directory) / f"optimized-{orientation}.jpg"
+                    image = Image.new("RGB", (120, 60), "red")
+                    exif = image.getexif()
+                    exif[274] = orientation
+                    image.save(source, exif=exif)
 
-            optimize_for_pdf(source, output)
+                    normalized = open_normalized(source)
+                    try:
+                        self.assertEqual(expected_size, normalized.size)
+                    finally:
+                        normalized.close()
 
-            with Image.open(output) as optimized:
-                self.assertEqual((60, 120), optimized.size)
+                    optimize_for_pdf(source, output)
+                    with Image.open(output) as optimized:
+                        self.assertEqual(expected_size, optimized.size)
 
     def test_composites_png_alpha_on_white(self):
         with tempfile.TemporaryDirectory() as directory:

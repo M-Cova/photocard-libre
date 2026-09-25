@@ -3,7 +3,6 @@ package org.photocardlibre.app.ui
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.media.ExifInterface
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -56,6 +55,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.exifinterface.media.ExifInterface
 import org.photocardlibre.app.R
 import org.photocardlibre.app.model.CropPreset
 import org.photocardlibre.app.model.CropRect
@@ -283,12 +283,14 @@ internal fun decodeOrientedBitmap(path: String, maximumSide: Int = 2048): Bitmap
         path,
         BitmapFactory.Options().apply { inSampleSize = sampleSize },
     ) ?: return null
-    val orientation = runCatching {
+    val orientation = try {
         ExifInterface(path).getAttributeInt(
             ExifInterface.TAG_ORIENTATION,
             ExifInterface.ORIENTATION_NORMAL,
         )
-    }.getOrDefault(ExifInterface.ORIENTATION_NORMAL)
+    } catch (_: Exception) {
+        ExifInterface.ORIENTATION_NORMAL
+    }
     val matrix = Matrix().apply {
         when (orientation) {
             ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> postScale(-1f, 1f)
