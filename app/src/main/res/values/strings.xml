@@ -54,11 +54,11 @@
     <string name="language_german" translatable="false">Deutsch</string>
     <string name="language_french" translatable="false">Français</string>
     <string name="language_portuguese" translatable="false">Português</string>
+    <string name="measurement_unit">MEASUREMENT UNIT</string>
+    <string name="measurement_unit_centimeters">Centimeters</string>
+    <string name="measurement_unit_inches">Inches</string>
     <string name="pdf_image_size_section">PDF IMAGE SIZE</string>
     <string name="pdf_image_size_support">Maximum size calculated on the longest side</string>
-    <string name="pdf_size_5_cm" translatable="false">5 cm</string>
-    <string name="pdf_size_7_cm" translatable="false">7 cm</string>
-    <string name="pdf_size_10_cm" translatable="false">10 cm</string>
     <string name="pdf_caption_size_section">PDF CAPTION SIZE</string>
     <string name="caption_size_small">Small</string>
     <string name="caption_size_medium">Medium</string>

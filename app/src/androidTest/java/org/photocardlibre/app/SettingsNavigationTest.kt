@@ -17,6 +17,7 @@ import org.photocardlibre.app.settings.AppLanguage
 import org.photocardlibre.app.settings.PdfImageSize
 import org.photocardlibre.app.settings.PdfCaptionSize
 import org.photocardlibre.app.settings.SettingsRepository
+import org.photocardlibre.app.settings.MeasurementUnit
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
@@ -28,6 +29,8 @@ class SettingsNavigationTest {
     fun useEnglish() {
         runBlocking {
             SettingsRepository(composeRule.activity).setAppLanguage(AppLanguage.ENGLISH)
+            SettingsRepository(composeRule.activity).setPdfImageSize(PdfImageSize.CM_5)
+            SettingsRepository(composeRule.activity).setMeasurementUnit(MeasurementUnit.CENTIMETERS)
         }
         composeRule.activityRule.scenario.recreate()
     }
@@ -78,6 +81,7 @@ class SettingsNavigationTest {
     fun settingsShowsMainOptions() {
         openSettings()
         listOf(
+            "3 cm",
             "5 cm",
             "7 cm",
             "10 cm",
@@ -90,6 +94,7 @@ class SettingsNavigationTest {
         }
         composeRule.onNodeWithTag("apri_lingua").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("English").assertIsDisplayed()
+        composeRule.onNodeWithText("Centimeters").assertIsDisplayed()
         composeRule.onNodeWithText("CUTTING BORDER").assertDoesNotExist()
         composeRule.onNodeWithText("Show the cutting border").assertDoesNotExist()
     }
@@ -118,6 +123,30 @@ class SettingsNavigationTest {
         composeRule.activityRule.scenario.recreate()
         openSettings()
         composeRule.onNodeWithTag("pdf_size_7").assertIsSelected()
+    }
+
+    @Test
+    fun measurementUnitChangesOnlyDisplayedLabelsAndPersists() {
+        openSettings()
+        composeRule.onNodeWithText("5 cm").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithTag("apri_unita_misura").performScrollTo().performClick()
+        composeRule.onNodeWithTag("measurement_unit_cm").assertIsSelected()
+        composeRule.onNodeWithText("Inches").performClick()
+        composeRule.waitUntil {
+            runBlocking {
+                val repository = SettingsRepository(composeRule.activity)
+                repository.measurementUnit.first() == MeasurementUnit.INCHES &&
+                    repository.pdfImageSize.first() == PdfImageSize.CM_5
+            }
+        }
+        pressSystemBack()
+        composeRule.onNodeWithText("1.97\"").performScrollTo().assertIsDisplayed()
+
+        composeRule.activityRule.scenario.recreate()
+        openSettings()
+        composeRule.onNodeWithText("Inches").assertIsDisplayed()
+        composeRule.onNodeWithText("1.97\"").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithTag("pdf_size_5").assertIsSelected()
     }
 
     @Test

@@ -55,6 +55,9 @@
     <string name="language_system">System</string>
     <string name="language_italian">Italiano</string>
     <string name="language_english">English</string>
+    <string name="measurement_unit">MASSEINHEIT</string>
+    <string name="measurement_unit_centimeters">Zentimeter</string>
+    <string name="measurement_unit_inches">Zoll</string>
     <string name="pdf_image_size_section">PDF-BILDGRÖSSE</string>
     <string name="pdf_image_size_support">Maximale Größe anhand der längsten Seite berechnet</string>
     <string name="pdf_caption_size_section">PDF-BESCHRIFTUNGSGRÖSSE</string>

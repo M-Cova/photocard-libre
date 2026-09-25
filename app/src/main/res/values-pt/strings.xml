@@ -57,6 +57,9 @@
     <string name="language_system">Sistema</string>
     <string name="language_italian">Italiano</string>
     <string name="language_english">English</string>
+    <string name="measurement_unit">UNIDADE DE MEDIDA</string>
+    <string name="measurement_unit_centimeters">Centímetros</string>
+    <string name="measurement_unit_inches">Polegadas</string>
     <string name="pdf_image_size_section">TAMANHO DAS IMAGENS PDF</string>
     <string name="pdf_image_size_support">Tamanho máximo calculado pelo lado mais comprido</string>
     <string name="pdf_caption_size_section">TAMANHO DA LEGENDA PDF</string>

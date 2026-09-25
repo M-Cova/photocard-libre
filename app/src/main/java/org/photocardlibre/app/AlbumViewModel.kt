@@ -17,6 +17,7 @@ import org.photocardlibre.app.settings.PdfImageSize
 import org.photocardlibre.app.settings.PdfCaptionSize
 import org.photocardlibre.app.settings.SettingsRepository
 import org.photocardlibre.app.settings.AppLanguage
+import org.photocardlibre.app.settings.MeasurementUnit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,6 +42,7 @@ data class AlbumUiState(
     val pdfImageSize: PdfImageSize = PdfImageSize.DEFAULT,
     val pdfCaptionSize: PdfCaptionSize = PdfCaptionSize.DEFAULT,
     val appLanguage: AppLanguage = AppLanguage.DEFAULT,
+    val measurementUnit: MeasurementUnit = MeasurementUnit.DEFAULT,
 ) {
     val hasSavedPdfActions: Boolean
         get() = !pdfSaving && !pdfPath.isNullOrBlank() && !savedPdfUri.isNullOrBlank()
@@ -64,6 +66,11 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             settings.pdfImageSize.collect { savedSize ->
                 state = state.copy(pdfImageSize = savedSize)
+            }
+        }
+        viewModelScope.launch {
+            settings.measurementUnit.collect { savedUnit ->
+                state = state.copy(measurementUnit = savedUnit)
             }
         }
         viewModelScope.launch {
@@ -92,6 +99,12 @@ class AlbumViewModel(application: Application) : AndroidViewModel(application) {
             savedPdfUri = null,
         )
         viewModelScope.launch { settings.setPdfImageSize(size) }
+    }
+
+    fun selectMeasurementUnit(unit: MeasurementUnit) {
+        if (unit == state.measurementUnit) return
+        state = state.copy(measurementUnit = unit)
+        viewModelScope.launch { settings.setMeasurementUnit(unit) }
     }
 
     fun selectPdfCaptionSize(size: PdfCaptionSize) {

@@ -1,6 +1,7 @@
 package org.photocardlibre.app.settings
 
 enum class PdfImageSize(val centimeters: Int) {
+    CM_3(3),
     CM_5(5),
     CM_7(7),
     CM_10(10),

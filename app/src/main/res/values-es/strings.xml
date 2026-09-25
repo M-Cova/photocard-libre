@@ -57,6 +57,9 @@
     <string name="language_system">Sistema</string>
     <string name="language_italian">Italiano</string>
     <string name="language_english">English</string>
+    <string name="measurement_unit">UNIDAD DE MEDIDA</string>
+    <string name="measurement_unit_centimeters">Centímetros</string>
+    <string name="measurement_unit_inches">Pulgadas</string>
     <string name="pdf_image_size_section">TAMAÑO DE IMAGEN EN PDF</string>
     <string name="pdf_image_size_support">Tamaño máximo calculado según el lado más largo</string>
     <string name="pdf_caption_size_section">TAMAÑO DEL PIE DE FOTO EN PDF</string>

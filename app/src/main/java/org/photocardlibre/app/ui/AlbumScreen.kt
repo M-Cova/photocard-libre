@@ -50,7 +50,7 @@ import org.photocardlibre.app.model.CropRect
 import org.photocardlibre.app.model.PhotoEntry
 import java.util.Locale
 
-private enum class AppDestination { ALBUM, SETTINGS, INFO, LANGUAGE }
+private enum class AppDestination { ALBUM, SETTINGS, INFO, LANGUAGE, MEASUREMENT_UNIT }
 private enum class WorkspacePage { ALBUM, PHOTO, PREVIEW, RESULT }
 
 @Composable
@@ -59,7 +59,8 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
     val activity = LocalActivity.current
     BackHandler(enabled = destination != AppDestination.ALBUM) {
         destination = when (destination) {
-            AppDestination.INFO, AppDestination.LANGUAGE -> AppDestination.SETTINGS
+            AppDestination.INFO, AppDestination.LANGUAGE, AppDestination.MEASUREMENT_UNIT ->
+                AppDestination.SETTINGS
             else -> AppDestination.ALBUM
         }
     }
@@ -68,6 +69,8 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
         AppDestination.SETTINGS -> SettingsScreen(
             selectedLanguage = viewModel.state.appLanguage,
             onOpenLanguage = { destination = AppDestination.LANGUAGE },
+            selectedMeasurementUnit = viewModel.state.measurementUnit,
+            onOpenMeasurementUnit = { destination = AppDestination.MEASUREMENT_UNIT },
             selectedImageSize = viewModel.state.pdfImageSize,
             onImageSizeSelected = viewModel::selectPdfImageSize,
             selectedCaptionSize = viewModel.state.pdfCaptionSize,
@@ -79,6 +82,11 @@ fun AlbumScreen(viewModel: AlbumViewModel) {
         AppDestination.LANGUAGE -> LanguageScreen(
             selectedLanguage = viewModel.state.appLanguage,
             onLanguageSelected = { viewModel.selectAppLanguage(it) { activity?.recreate() } },
+            onBack = { destination = AppDestination.SETTINGS },
+        )
+        AppDestination.MEASUREMENT_UNIT -> MeasurementUnitScreen(
+            selectedUnit = viewModel.state.measurementUnit,
+            onUnitSelected = viewModel::selectMeasurementUnit,
             onBack = { destination = AppDestination.SETTINGS },
         )
     }

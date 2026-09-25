@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,12 +44,15 @@ import org.photocardlibre.app.R
 import org.photocardlibre.app.settings.AppLanguage
 import org.photocardlibre.app.settings.PdfCaptionSize
 import org.photocardlibre.app.settings.PdfImageSize
+import org.photocardlibre.app.settings.MeasurementUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SettingsScreen(
     selectedLanguage: AppLanguage,
     onOpenLanguage: () -> Unit,
+    selectedMeasurementUnit: MeasurementUnit,
+    onOpenMeasurementUnit: () -> Unit,
     selectedImageSize: PdfImageSize,
     onImageSizeSelected: (PdfImageSize) -> Unit,
     selectedCaptionSize: PdfCaptionSize,
@@ -58,6 +62,7 @@ internal fun SettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     BackHandler(onBack = onBack)
+    val displayLocale = LocalConfiguration.current.locales[0]
 
     Scaffold(
         modifier = modifier.fillMaxSize().testTag("schermata_impostazioni"),
@@ -98,6 +103,27 @@ internal fun SettingsScreen(
                         .clickable(onClick = onOpenLanguage)
                         .testTag("apri_lingua"),
                 )
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.measurement_unit)) },
+                    supportingContent = {
+                        Text(
+                            stringResource(selectedMeasurementUnit.labelResource),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    trailingContent = {
+                        Text(
+                            "›",
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.clearAndSetSemantics { },
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 56.dp)
+                        .clickable(onClick = onOpenMeasurementUnit)
+                        .testTag("apri_unita_misura"),
+                )
             }
 
             Spacer(Modifier.height(12.dp))
@@ -110,12 +136,13 @@ internal fun SettingsScreen(
             )
             AppPanel {
                 listOf(
-                    PdfImageSize.CM_5 to R.string.pdf_size_5_cm,
-                    PdfImageSize.CM_7 to R.string.pdf_size_7_cm,
-                    PdfImageSize.CM_10 to R.string.pdf_size_10_cm,
-                ).forEach { (size, label) ->
+                    PdfImageSize.CM_3,
+                    PdfImageSize.CM_5,
+                    PdfImageSize.CM_7,
+                    PdfImageSize.CM_10,
+                ).forEach { size ->
                     RadioSettingsOption(
-                        label = label,
+                        label = selectedMeasurementUnit.format(size.centimeters, displayLocale),
                         selected = selectedImageSize == size,
                         onSelect = { onImageSizeSelected(size) },
                         radioTestTag = "pdf_size_${size.centimeters}",
@@ -132,7 +159,7 @@ internal fun SettingsScreen(
                     PdfCaptionSize.LARGE to R.string.caption_size_large,
                 ).forEach { (size, label) ->
                     RadioSettingsOption(
-                        label = label,
+                        label = stringResource(label),
                         selected = selectedCaptionSize == size,
                         onSelect = { onCaptionSizeSelected(size) },
                         radioTestTag = "caption_size_${size.storageValue}",
@@ -193,7 +220,7 @@ private fun SettingsSectionTitle(@StringRes title: Int) {
 
 @Composable
 private fun RadioSettingsOption(
-    @StringRes label: Int,
+    label: String,
     selected: Boolean,
     onSelect: () -> Unit,
     radioTestTag: String? = null,
@@ -216,7 +243,7 @@ private fun RadioSettingsOption(
             onClick = null,
             modifier = if (radioTestTag == null) Modifier else Modifier.testTag(radioTestTag),
         )
-        Text(stringResource(label), style = MaterialTheme.typography.bodyLarge)
+        Text(label, style = MaterialTheme.typography.bodyLarge)
     }
 }
 

@@ -48,6 +48,20 @@ class SettingsRepository internal constructor(
         }
     }
 
+    val measurementUnit: Flow<MeasurementUnit> = dataStore.data
+        .catch { error ->
+            if (error is IOException) emit(emptyPreferences()) else throw error
+        }
+        .map { preferences ->
+            MeasurementUnit.fromStorageValue(preferences[MEASUREMENT_UNIT])
+        }
+
+    suspend fun setMeasurementUnit(unit: MeasurementUnit) {
+        dataStore.edit { preferences ->
+            preferences[MEASUREMENT_UNIT] = unit.storageValue
+        }
+    }
+
     val pdfCaptionSize: Flow<PdfCaptionSize> = dataStore.data
         .catch { error ->
             if (error is IOException) emit(emptyPreferences()) else throw error
@@ -66,5 +80,6 @@ class SettingsRepository internal constructor(
         val APP_LANGUAGE = stringPreferencesKey("app_language")
         val PDF_CAPTION_SIZE = stringPreferencesKey("pdf_caption_size")
         val PDF_IMAGE_SIZE_CM = intPreferencesKey("pdf_image_size_cm")
+        val MEASUREMENT_UNIT = stringPreferencesKey("measurement_unit")
     }
 }

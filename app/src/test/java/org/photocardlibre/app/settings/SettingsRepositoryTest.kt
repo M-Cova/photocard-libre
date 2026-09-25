@@ -1,6 +1,8 @@
 package org.photocardlibre.app.settings
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -91,6 +93,80 @@ class SettingsRepositoryTest {
             assertEquals(PdfImageSize.CM_10, secondRepository.pdfImageSize.first())
         } finally {
             secondScope.cancel()
+        }
+    }
+
+    @Test
+    fun everyPhysicalImageSizePersists() = runBlocking {
+        PdfImageSize.entries.forEach { selectedSize ->
+            val preferencesFile = File(
+                temporaryFolder.newFolder("image_${selectedSize.centimeters}"),
+                "settings.preferences_pb",
+            )
+            val firstScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            val firstRepository = SettingsRepository(
+                PreferenceDataStoreFactory.create(scope = firstScope) { preferencesFile },
+            )
+            assertEquals(PdfImageSize.CM_5, firstRepository.pdfImageSize.first())
+            firstRepository.setPdfImageSize(selectedSize)
+            assertEquals(selectedSize, firstRepository.pdfImageSize.first())
+            firstScope.cancel()
+
+            val secondScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            try {
+                val recreatedRepository = SettingsRepository(
+                    PreferenceDataStoreFactory.create(scope = secondScope) { preferencesFile },
+                )
+                assertEquals(selectedSize, recreatedRepository.pdfImageSize.first())
+            } finally {
+                secondScope.cancel()
+            }
+        }
+    }
+
+    @Test
+    fun measurementUnitDefaultsToCentimetersAndEverySelectionPersists() = runBlocking {
+        MeasurementUnit.entries.forEach { selectedUnit ->
+            val preferencesFile = File(
+                temporaryFolder.newFolder("unit_${selectedUnit.storageValue}"),
+                "settings.preferences_pb",
+            )
+            val firstScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            val firstRepository = SettingsRepository(
+                PreferenceDataStoreFactory.create(scope = firstScope) { preferencesFile },
+            )
+            assertEquals(MeasurementUnit.CENTIMETERS, firstRepository.measurementUnit.first())
+            firstRepository.setMeasurementUnit(selectedUnit)
+            assertEquals(selectedUnit, firstRepository.measurementUnit.first())
+            firstScope.cancel()
+
+            val secondScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            try {
+                val recreatedRepository = SettingsRepository(
+                    PreferenceDataStoreFactory.create(scope = secondScope) { preferencesFile },
+                )
+                assertEquals(selectedUnit, recreatedRepository.measurementUnit.first())
+            } finally {
+                secondScope.cancel()
+            }
+        }
+    }
+
+    @Test
+    fun unknownStoredMeasurementUnitFallsBackToCentimeters() = runBlocking {
+        val preferencesFile = File(temporaryFolder.root, "unknown_unit.preferences_pb")
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        try {
+            val store = PreferenceDataStoreFactory.create(scope = scope) { preferencesFile }
+            store.edit { preferences ->
+                preferences[stringPreferencesKey("measurement_unit")] = "yards"
+            }
+            assertEquals(
+                MeasurementUnit.CENTIMETERS,
+                SettingsRepository(store).measurementUnit.first(),
+            )
+        } finally {
+            scope.cancel()
         }
     }
 

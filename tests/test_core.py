@@ -30,6 +30,11 @@ class AndroidCoreTests(unittest.TestCase):
         width, height = photo_size(1200, 800)
         self.assertAlmostEqual(config.cm_to_points(5), max(width, height))
 
+    def test_three_centimeters_is_a_supported_physical_preset(self):
+        self.assertEqual((3, 5, 7, 10), config.SUPPORTED_MAX_PHOTO_SIDE_CM)
+        width, height = photo_size(1200, 800, 3)
+        self.assertAlmostEqual(config.cm_to_points(3), max(width, height))
+
     def test_only_supported_pdf_image_sizes_are_accepted(self):
         with self.assertRaisesRegex(ValueError, "non supportata"):
             photo_size(1200, 800, 6)
@@ -58,7 +63,7 @@ class AndroidCoreTests(unittest.TestCase):
             "path": str(ASSETS / "orizzontale.png"),
             "caption": "DIMENSIONE REALE",
         }])
-        for max_side_cm in (7, 10):
+        for max_side_cm in config.SUPPORTED_MAX_PHOTO_SIDE_CM:
             observed = []
 
             def capture_preview(layout, page_index, caption_size="medium"):
