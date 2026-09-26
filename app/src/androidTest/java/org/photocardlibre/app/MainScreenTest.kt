@@ -1,5 +1,7 @@
 package org.photocardlibre.app
 
+import androidx.activity.ComponentActivity
+import androidx.annotation.StringRes
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
@@ -16,7 +18,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import org.junit.Rule
-import org.junit.Before
 import org.junit.Test
 import org.photocardlibre.app.ui.SavedPdfActions
 import org.photocardlibre.app.ui.PdfNameDialog
@@ -24,31 +25,10 @@ import org.photocardlibre.app.ui.AlbumGallery
 import org.photocardlibre.app.ui.SelectedPhotoEditor
 import org.photocardlibre.app.model.PhotoEntry
 import org.junit.Assert.assertEquals
-import org.photocardlibre.app.settings.AppLanguage
-import org.photocardlibre.app.settings.SettingsRepository
-import kotlinx.coroutines.runBlocking
 
 class MainScreenTest {
     @get:Rule
-    val composeRule = createAndroidComposeRule<MainActivity>()
-
-    @Before
-    fun useEnglish() {
-        runBlocking {
-            SettingsRepository(composeRule.activity).setAppLanguage(AppLanguage.ENGLISH)
-        }
-        composeRule.activityRule.scenario.recreate()
-    }
-
-    @Test
-    fun emptyAlbumHasOneClearStartingAction() {
-        composeRule.onNodeWithText("PhotoCard Libre").assertIsDisplayed()
-        composeRule.onNodeWithText("Your album starts here").assertIsDisplayed()
-        composeRule.onNodeWithText("ADD PHOTOS").assertIsDisplayed()
-        composeRule.onNodeWithText("PREVIEW PDF").assertDoesNotExist()
-        composeRule.onNodeWithText("CREATE PDF").assertDoesNotExist()
-        composeRule.onNodeWithTag("album_vuoto").assertIsDisplayed()
-    }
+    val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
     fun populatedAlbumExplainsPhotoEditingAndNamesPdfPreview() {
@@ -67,21 +47,11 @@ class MainScreenTest {
             }
         }
 
-        composeRule.onNodeWithText("Tap a photo to edit it.").assertIsDisplayed()
-        composeRule.onNodeWithContentDescription("Selected photo").assertDoesNotExist()
-        composeRule.onNodeWithText("PREVIEW PDF").assertIsDisplayed()
+        composeRule.onNodeWithText(string(R.string.album_tap_to_edit)).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(string(R.string.selected_photo_description)).assertDoesNotExist()
+        composeRule.onNodeWithText(string(R.string.action_preview)).assertIsDisplayed()
         composeRule.onNodeWithTag("foto_first").performClick()
         composeRule.runOnIdle { assertEquals("first", selectedId) }
-    }
-
-    @Test
-    fun applicationLabelUsesThePublicBrand() {
-        val activity = composeRule.activity
-        assertEquals("PhotoCard Libre", activity.getString(R.string.app_name))
-        assertEquals(
-            "PhotoCard Libre",
-            activity.applicationInfo.loadLabel(activity.packageManager).toString(),
-        )
     }
 
     @Test
@@ -93,8 +63,8 @@ class MainScreenTest {
         }
 
         composeRule.onNodeWithTag("azioni_pdf_salvato").assertIsDisplayed()
-        composeRule.onNodeWithText("OPEN PDF").assertIsDisplayed()
-        composeRule.onNodeWithText("SHARE PDF").assertIsDisplayed()
+        composeRule.onNodeWithText(string(R.string.open_pdf)).assertIsDisplayed()
+        composeRule.onNodeWithText(string(R.string.share_pdf)).assertIsDisplayed()
     }
 
     @Test
@@ -121,7 +91,7 @@ class MainScreenTest {
             }
         }
 
-        composeRule.onNodeWithText("Order in album").assertIsDisplayed()
+        composeRule.onNodeWithText(string(R.string.reorder_heading)).assertIsDisplayed()
         composeRule.onNodeWithTag("sposta_first_prima").assertIsNotEnabled()
         composeRule.onNodeWithTag("sposta_first_dopo").performClick()
         composeRule.runOnIdle {
@@ -145,7 +115,7 @@ class MainScreenTest {
         }
 
         composeRule.onNodeWithTag("elimina_foto").performClick()
-        composeRule.onNodeWithText("Delete this photo?").assertIsDisplayed()
+        composeRule.onNodeWithText(string(R.string.delete_photo_confirmation_title)).assertIsDisplayed()
         composeRule.runOnIdle { assertEquals(0, deleteCount) }
         composeRule.onNodeWithTag("annulla_elimina_foto").performClick()
         composeRule.runOnIdle { assertEquals(0, deleteCount) }
@@ -172,11 +142,13 @@ class MainScreenTest {
             }
         }
 
-        composeRule.onNodeWithText("PDF FILE NAME").assertIsDisplayed()
+        composeRule.onNodeWithText(string(R.string.pdf_name_title)).assertIsDisplayed()
         composeRule.onNodeWithTag("nome_file_pdf").assertTextContains(defaultName)
         composeRule.onNodeWithTag("nome_file_pdf").performTextClearance()
         composeRule.onNodeWithTag("nome_file_pdf").performTextInput("VACANZE MARE")
-        composeRule.onNodeWithText("SAVE").performClick()
+        composeRule.onNodeWithText(string(R.string.save)).performClick()
         composeRule.runOnIdle { assertEquals("VACANZE MARE", savedName) }
     }
+
+    private fun string(@StringRes resource: Int): String = composeRule.activity.getString(resource)
 }

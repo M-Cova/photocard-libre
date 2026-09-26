@@ -1,6 +1,8 @@
 package org.photocardlibre.app
 
 import android.graphics.Bitmap
+import androidx.activity.ComponentActivity
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.requiredSize
@@ -35,24 +37,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
-import org.junit.Before
 import org.junit.Test
-import org.photocardlibre.app.settings.AppLanguage
-import org.photocardlibre.app.settings.SettingsRepository
-import kotlinx.coroutines.runBlocking
 import java.io.File
 
 class CropEditorTest {
     @get:Rule
-    val composeRule = createAndroidComposeRule<MainActivity>()
-
-    @Before
-    fun useItalian() {
-        runBlocking {
-            SettingsRepository(composeRule.activity).setAppLanguage(AppLanguage.ITALIAN)
-        }
-        composeRule.activityRule.scenario.recreate()
-    }
+    val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
     fun editPhotoOpensAFullScreenDestinationWithoutDialog() {
@@ -73,9 +63,9 @@ class CropEditorTest {
             }
         }
 
-        composeRule.onNodeWithText("ASPETTO").performClick()
+        composeRule.onNodeWithText(string(R.string.aspect_ratio)).performClick()
         composeRule.onNodeWithTag("editor_crop").assertIsDisplayed()
-        composeRule.onNodeWithText("CONFERMA").assertIsDisplayed().assertHasClickAction()
+        composeRule.onNodeWithText(string(R.string.confirm)).assertIsDisplayed().assertHasClickAction()
         assertTrue(composeRule.onAllNodes(isDialog()).fetchSemanticsNodes().isEmpty())
     }
 
@@ -83,10 +73,10 @@ class CropEditorTest {
     fun editorShowsOnlyRequiredPresetsAndConfirm() {
         setEditor()
 
-        listOf("ORIGINALE", "1:1", "4:3", "3:4").forEach { label ->
+        listOf(string(R.string.crop_original), "1:1", "4:3", "3:4").forEach { label ->
             composeRule.onNodeWithText(label).fetchSemanticsNode()
         }
-        composeRule.onNodeWithText("CONFERMA").assertIsDisplayed().assertHasClickAction()
+        composeRule.onNodeWithText(string(R.string.confirm)).assertIsDisplayed().assertHasClickAction()
         assertTrue(composeRule.onAllNodesWithText("3:2").fetchSemanticsNodes().isEmpty())
         assertTrue(composeRule.onAllNodesWithText("RIPRISTINA").fetchSemanticsNodes().isEmpty())
         assertTrue(composeRule.onAllNodesWithText("ANNULLA").fetchSemanticsNodes().isEmpty())
@@ -115,7 +105,7 @@ class CropEditorTest {
         }
 
         composeRule.onNodeWithText("1:1").performClick()
-        composeRule.onNodeWithText("CONFERMA").performClick()
+        composeRule.onNodeWithText(string(R.string.confirm)).performClick()
         composeRule.runOnIdle {
             val crop = requireNotNull(confirmed)
             val bitmap = requireNotNull(decodeOrientedBitmap(photo.localPath))
@@ -149,8 +139,8 @@ class CropEditorTest {
             }
         }
 
-        composeRule.onNodeWithText("ORIGINALE").performClick()
-        composeRule.onNodeWithText("CONFERMA").performClick()
+        composeRule.onNodeWithText(string(R.string.crop_original)).performClick()
+        composeRule.onNodeWithText(string(R.string.confirm)).performClick()
         composeRule.runOnIdle { assertNull(confirmed) }
         composeRule.onNodeWithText("SCHERMATA PRINCIPALE").assertIsDisplayed()
     }
@@ -290,10 +280,12 @@ class CropEditorTest {
     }
 
     private fun assertConfirmVisibleAndClickable() {
-        composeRule.onNodeWithText("CONFERMA")
+        composeRule.onNodeWithText(string(R.string.confirm))
             .assertIsDisplayed()
             .assertHasClickAction()
     }
+
+    private fun string(@StringRes resource: Int): String = composeRule.activity.getString(resource)
 
     private fun testPhoto(crop: CropRect? = null): PhotoEntry {
         val file = File(composeRule.activity.cacheDir, "crop-editor-test.png")

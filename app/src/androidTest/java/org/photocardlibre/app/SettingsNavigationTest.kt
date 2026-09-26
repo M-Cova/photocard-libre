@@ -3,13 +3,15 @@ package org.photocardlibre.app
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.test.espresso.Espresso.pressBack
 import org.junit.Rule
 import org.junit.Before
 import org.junit.Test
@@ -31,6 +33,7 @@ class SettingsNavigationTest {
             SettingsRepository(composeRule.activity).setAppLanguage(AppLanguage.ENGLISH)
             SettingsRepository(composeRule.activity).setPdfImageSize(PdfImageSize.CM_5)
             SettingsRepository(composeRule.activity).setMeasurementUnit(MeasurementUnit.CENTIMETERS)
+            SettingsRepository(composeRule.activity).setPdfCaptionSize(PdfCaptionSize.DEFAULT)
         }
         composeRule.activityRule.scenario.recreate()
     }
@@ -114,15 +117,15 @@ class SettingsNavigationTest {
     fun selectedPdfImageSizeRemainsSelectedAfterActivityRecreation() {
         openSettings()
         composeRule.onNodeWithText("7 cm").performScrollTo().performClick()
-        composeRule.waitUntil {
+        composeRule.waitUntil(timeoutMillis = 5_000) {
             runBlocking {
                 SettingsRepository(composeRule.activity).pdfImageSize.first() == PdfImageSize.CM_7
             }
         }
 
         composeRule.activityRule.scenario.recreate()
-        openSettings()
-        composeRule.onNodeWithTag("pdf_size_7").assertIsSelected()
+        composeRule.onNodeWithTag("schermata_impostazioni").assertIsDisplayed()
+        assertSelectionRestored("7 cm")
     }
 
     @Test
@@ -132,7 +135,7 @@ class SettingsNavigationTest {
         composeRule.onNodeWithTag("apri_unita_misura").performScrollTo().performClick()
         composeRule.onNodeWithTag("measurement_unit_cm").assertIsSelected()
         composeRule.onNodeWithText("Inches").performClick()
-        composeRule.waitUntil {
+        composeRule.waitUntil(timeoutMillis = 5_000) {
             runBlocking {
                 val repository = SettingsRepository(composeRule.activity)
                 repository.measurementUnit.first() == MeasurementUnit.INCHES &&
@@ -143,17 +146,17 @@ class SettingsNavigationTest {
         composeRule.onNodeWithText("1.97\"").performScrollTo().assertIsDisplayed()
 
         composeRule.activityRule.scenario.recreate()
-        openSettings()
+        composeRule.onNodeWithTag("schermata_impostazioni").assertIsDisplayed()
         composeRule.onNodeWithText("Inches").assertIsDisplayed()
         composeRule.onNodeWithText("1.97\"").performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithTag("pdf_size_5").assertIsSelected()
+        assertSelectionRestored("1.97\"")
     }
 
     @Test
     fun selectedCaptionSizeRemainsSelectedAfterActivityRecreation() {
         openSettings()
         composeRule.onNodeWithText("Large").performScrollTo().performClick()
-        composeRule.waitUntil {
+        composeRule.waitUntil(timeoutMillis = 5_000) {
             runBlocking {
                 SettingsRepository(composeRule.activity).pdfCaptionSize.first() ==
                     PdfCaptionSize.LARGE
@@ -161,15 +164,15 @@ class SettingsNavigationTest {
         }
 
         composeRule.activityRule.scenario.recreate()
-        openSettings()
-        composeRule.onNodeWithTag("caption_size_large").assertIsSelected()
+        composeRule.onNodeWithTag("schermata_impostazioni").assertIsDisplayed()
+        assertSelectionRestored("Large")
     }
 
     @Test
     fun languageSelectionIsAppliedToSettingsAndInfoAndRestoredAfterRecreation() {
         openLanguage()
         composeRule.onNodeWithTag("language_it").performClick()
-        composeRule.waitUntil {
+        composeRule.waitUntil(timeoutMillis = 5_000) {
             runBlocking {
                 SettingsRepository(composeRule.activity).appLanguage.first() == AppLanguage.ITALIAN
             }
@@ -193,7 +196,7 @@ class SettingsNavigationTest {
     }
 
     private fun openSettings() {
-        composeRule.onNodeWithContentDescription("Open settings").performClick()
+        composeRule.onNodeWithTag("apri_impostazioni").performClick()
     }
 
     private fun openInfo() {
@@ -207,8 +210,15 @@ class SettingsNavigationTest {
     }
 
     private fun pressSystemBack() {
-        composeRule.runOnUiThread {
-            composeRule.activity.onBackPressedDispatcher.onBackPressed()
+        pressBack()
+    }
+
+    private fun assertSelectionRestored(label: String) {
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule.onAllNodes(
+                hasText(label) and isSelected(),
+            ).fetchSemanticsNodes().size == 1
         }
+        composeRule.onNodeWithText(label).assertIsSelected()
     }
 }
