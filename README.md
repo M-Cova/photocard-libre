@@ -1,8 +1,15 @@
-# PhotoCard Libre Android v0.1-beta.2
+# PhotoCard Libre Android v0.1-beta.3
 
 PhotoCard Libre è un'app Android per comporre fotografie su pagine A4 e generare PDF pronti per la stampa. Il frontend è Kotlin + Jetpack Compose; layout MaxRects, didascalie, anteprima e PDF rimangono nel core Python eseguito da Chaquopy.
 
 > Stato: versione Android funzionante e già testata su telefono reale.
+
+## Beta 3
+
+Questa beta consolida sicurezza e affidabilità: hardening generale, limiti agli
+input, gestione EXIF tramite AndroidX ExifInterface, pulizia della cache,
+logging release ridotto ed esclusione dai backup. La distribuzione usa una
+build release firmata e i test strumentali sono stati eseguiti realmente.
 
 Il progetto desktop `/home/codex/foto-album` non viene usato a runtime e non deve essere modificato.
 
@@ -65,7 +72,7 @@ Il test Compose strumentale è compilato nell'APK di test ma richiede un device/
 ## Prova obbligatoria su telefono ARM64
 
 ```bash
-adb install -r app/build/outputs/apk/debug/PhotoCard-Libre-v0.1-beta.2-arm64.apk
+adb install -r app/build/outputs/apk/release/PhotoCard-Libre-v0.1-beta.3-arm64.apk
 adb shell am start -n org.photocardlibre.app/.MainActivity
 ```
 
