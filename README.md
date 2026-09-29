@@ -1,63 +1,64 @@
 # PhotoCard Libre
 
-PhotoCard Libre è un’app Android gratuita e open source per creare schede fotografiche stampabili direttamente dallo smartphone.
+Italiano: [README.it.md](README.it.md)
 
-Può essere utile anche in contesti di Comunicazione Aumentativa e Alternativa (CAA/AAC), per creare schede con fotografie e brevi didascalie di massimo 4 parole legate a persone, oggetti, luoghi e attività di tutti i giorni.
+PhotoCard Libre is a free and open-source Android app for creating printable photo cards directly on a smartphone.
 
-Le immagini possono essere scelte direttamente dalla galleria dello smartphone, senza doverle trasferire su un altro dispositivo.
+It can also be useful in Augmentative and Alternative Communication (AAC) contexts, for creating cards with photographs and short captions of up to 4 words related to people, objects, places, and everyday activities.
 
-PhotoCard Libre è uno strumento di supporto e non sostituisce software CAA completi o strumenti professionali dedicati.
+Images can be selected directly from the smartphone gallery, without having to transfer them to another device.
 
-> Schede fotografiche stampabili, anche per CAA/AAC
+PhotoCard Libre is a support tool and does not replace complete AAC software or dedicated professional tools.
 
-## Funzioni
+> Printable photo cards, also for AAC
 
-- selezione di fotografie dalla galleria;
-- ritaglio delle immagini;
-- aggiunta di brevi didascalie di massimo 4 parole;
-- riordinamento delle fotografie;
-- scelta della dimensione delle immagini;
-- scelta della dimensione delle didascalie;
-- anteprima delle schede;
-- generazione di PDF A4;
-- salvataggio e condivisione del PDF;
-- supporto multilingua.
+## Features
 
-## Formati supportati
+- select photographs from the gallery;
+- crop images;
+- add short captions of up to 4 words;
+- reorder photographs;
+- choose image size;
+- choose caption size;
+- preview cards;
+- generate A4 PDFs;
+- save and share PDFs;
+- multilingual support.
+
+## Supported formats
 
 - JPEG
 - PNG
 
 ## Privacy
 
-PhotoCard Libre funziona localmente sul dispositivo.
+PhotoCard Libre works locally on the device.
 
-- non richiede accesso a Internet;
-- non contiene pubblicità;
-- non utilizza sistemi di tracciamento o analisi dell’uso;
-- non richiede registrazione né account;
-- fotografie e didascalie rimangono sul dispositivo e non vengono caricate su server esterni;
-- i file temporanei restano nell’area privata dell’app;
-- i PDF vengono salvati o condivisi solo quando l’utente sceglie di farlo.
+- it does not require Internet access;
+- it contains no advertising;
+- it does not use tracking or usage analytics;
+- it does not require registration or an account;
+- photographs and captions remain on the device and are not uploaded to external servers;
+- temporary files remain in the app’s private storage area;
+- PDFs are saved or shared only when the user chooses to do so.
 
-## Licenze
+## Licenses
 
-Software: GNU GPL-3.0-or-later
+**Software:** GNU GPL-3.0-or-later
 
-Elementi grafici originali: Creative Commons Attribution 4.0 International — CC BY 4.0
+**Original graphic assets:** Creative Commons Attribution 4.0 International — CC BY 4.0
 
-Alcuni elementi grafici sono stati creati con l’ausilio di strumenti di generazione AI.
+Some graphic assets were created with the assistance of AI generation tools.
 
-## Stato del progetto
+## Project status
 
-PhotoCard Libre è attualmente in fase beta.
+PhotoCard Libre is currently in beta.
 
-## Progetto
+## Project
 
-Codice sorgente: questo repository
+Source code: this repository
+Issue reporting: GitHub Issues
 
-Segnalazione problemi: GitHub Issues
+## Credits
 
-## Crediti
-
-PhotoCard Libre è un progetto libero e indipendente.
+PhotoCard Libre is a free and independent project.
