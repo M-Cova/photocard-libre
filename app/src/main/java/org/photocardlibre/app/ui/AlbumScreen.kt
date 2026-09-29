@@ -323,7 +323,7 @@ internal fun AlbumGallery(
                 Text(stringResource(R.string.empty_album_title), style = MaterialTheme.typography.headlineLarge,
                     textAlign = TextAlign.Center)
                 Spacer(Modifier.height(10.dp))
-                Text(stringResource(R.string.app_description), style = MaterialTheme.typography.bodyLarge,
+                Text(stringResource(R.string.app_tagline), style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(28.dp))
                 Button(onClick = onAdd, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).testTag("aggiungi_foto")) {
@@ -331,6 +331,14 @@ internal fun AlbumGallery(
                     Spacer(Modifier.width(10.dp))
                     Text(stringResource(R.string.action_add_photos))
                 }
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.supported_formats),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.testTag("formati_supportati"),
+                )
                 MessageText(message)
             }
         } else {

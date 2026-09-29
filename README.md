@@ -1,83 +1,63 @@
-# PhotoCard Libre Android v0.1-beta.3
+# PhotoCard Libre
 
-PhotoCard Libre è un'app Android per comporre fotografie su pagine A4 e generare PDF pronti per la stampa. Il frontend è Kotlin + Jetpack Compose; layout MaxRects, didascalie, anteprima e PDF rimangono nel core Python eseguito da Chaquopy.
+PhotoCard Libre è un’app Android gratuita e open source per creare schede fotografiche stampabili direttamente dallo smartphone.
 
-> Stato: versione Android funzionante e già testata su telefono reale.
+Può essere utile anche in contesti di Comunicazione Aumentativa e Alternativa (CAA/AAC), per creare schede con fotografie e brevi didascalie di massimo 4 parole legate a persone, oggetti, luoghi e attività di tutti i giorni.
 
-## Beta 3
+Le immagini possono essere scelte direttamente dalla galleria dello smartphone, senza doverle trasferire su un altro dispositivo.
 
-Questa beta consolida sicurezza e affidabilità: hardening generale, limiti agli
-input, gestione EXIF tramite AndroidX ExifInterface, pulizia della cache,
-logging release ridotto ed esclusione dai backup. La distribuzione usa una
-build release firmata e i test strumentali sono stati eseguiti realmente.
+PhotoCard Libre è uno strumento di supporto e non sostituisce software CAA completi o strumenti professionali dedicati.
 
-Il progetto desktop `/home/codex/foto-album` non viene usato a runtime e non deve essere modificato.
+> Schede fotografiche stampabili, anche per CAA/AAC
 
-## Flusso utente
+## Funzioni
 
-1. `AGGIUNGI FOTO` apre il Photo Picker Android multiplo.
-2. `PhotoCacheAdapter` legge ogni `content://` con `ContentResolver` e copia JPEG/PNG in `cache/photo_inputs`. Gli URI non vengono trasformati in path.
-3. La schermata mostra miniature, selezione, anteprima grande, didascalia, riordino ed eliminazione.
-4. `ANTEPRIMA` chiede al core Python di creare una PNG per ogni pagina A4 in `cache/photo_output`.
-5. `CREA PDF` genera `cache/photo_output/foto-album.pdf` e le anteprime dallo stesso `LayoutResult`.
-6. Su Android 10+ il PDF viene salvato automaticamente tramite MediaStore in `Download/PhotoCard Libre/` con nome `PhotoCard_YYYY-MM-DD_HHMM.pdf`.
-7. Su Android 7–9 si apre automaticamente `ACTION_CREATE_DOCUMENT` come fallback. Dopo il salvataggio restano disponibili `APRI PDF` e `CONDIVIDI PDF`.
+- selezione di fotografie dalla galleria;
+- ritaglio delle immagini;
+- aggiunta di brevi didascalie di massimo 4 parole;
+- riordinamento delle fotografie;
+- scelta della dimensione delle immagini;
+- scelta della dimensione delle didascalie;
+- anteprima delle schede;
+- generazione di PDF A4;
+- salvataggio e condivisione del PDF;
+- supporto multilingua.
 
-## Architettura
+## Formati supportati
 
-- `ui/AlbumScreen.kt`: UI Compose in italiano.
-- `AlbumViewModel.kt`, `model/AlbumState.kt`: stato, operazioni e lavoro asincrono.
-- `storage/PhotoCacheAdapter.kt`: confine `content://` → copia cache → path locale.
-- `python/PythonAlbumBridge.kt`: payload JSON e chiamata Chaquopy.
-- `export/PdfExport.kt`: Storage Access Framework e condivisione.
-- `app/src/main/python/photo_album/`: core Python condiviso, senza Tkinter/XDG.
-- `app/src/main/python/android_bridge.py`: costruzione `PhotoItem`, unico layout e output.
+- JPEG
+- PNG
 
-## Cache e formati
+## Privacy
 
-All'apertura di una nuova sessione, `cache/photo_inputs` viene cancellata. Ogni eliminazione rimuove anche la copia corrispondente. PDF e anteprime hanno nomi stabili e vengono sovrascritti; le vecchie anteprime vengono eliminate prima di ogni rendering. Non si accumulano sessioni senza limite.
+PhotoCard Libre funziona localmente sul dispositivo.
 
-La V0.1 accetta intenzionalmente solo MIME `image/jpeg` e `image/png`. HEIC e WebP non sono dichiarati supportati perché i relativi codec non sono stati validati sul wheel Pillow Android ARM64.
+- non richiede accesso a Internet;
+- non contiene pubblicità;
+- non utilizza sistemi di tracciamento o analisi dell’uso;
+- non richiede registrazione né account;
+- fotografie e didascalie rimangono sul dispositivo e non vengono caricate su server esterni;
+- i file temporanei restano nell’area privata dell’app;
+- i PDF vengono salvati o condivisi solo quando l’utente sceglie di farlo.
 
-La barra inferiore usa `navigationBarsPadding()`: i tre comandi principali ricevono dinamicamente l'inset della barra di navigazione, senza assumere un'altezza fissa.
+## Licenze
 
-## Dipendenze verificate dal build
+Software: GNU GPL-3.0-or-later
 
-- Chaquopy 17.0.0 e Python 3.12;
-- Pillow 11.0.0, wheel Android CPython 3.12 `arm64-v8a`. È la versione più
-  recente pubblicata nel repository wheel Chaquopy per questa combinazione;
-  le release Pillow successive non hanno un wheel Android compatibile e non
-  vengono forzate da sorgente;
-- ReportLab 5.0.1;
-- Compose BOM 2025.01.01;
-- minSdk 24, target/compileSdk 35, solo ABI `arm64-v8a`.
+Elementi grafici originali: Creative Commons Attribution 4.0 International — CC BY 4.0
 
-Il font DejaVu Sans è incluso nel package e caricato relativamente a `typography.py`; la licenza è in `assets/DEJAVU-LICENSE.txt`.
+Alcuni elementi grafici sono stati creati con l’ausilio di strumenti di generazione AI.
 
-## Build e test
+## Stato del progetto
 
-Con JDK 17 e Android SDK 35 configurati:
+PhotoCard Libre è attualmente in fase beta.
 
-```bash
-./gradlew testDebugUnitTest assembleDebug assembleDebugAndroidTest
-PYTHONPATH=app/src/main/python python3 -m unittest discover -s tests -v
-```
+## Progetto
 
-Il test Compose strumentale è compilato nell'APK di test ma richiede un device/emulatore:
+Codice sorgente: questo repository
 
-```bash
-./gradlew connectedDebugAndroidTest
-```
+Segnalazione problemi: GitHub Issues
 
-## Prova obbligatoria su telefono ARM64
+## Crediti
 
-```bash
-adb install -r app/build/outputs/apk/release/PhotoCard-Libre-v0.1-beta.3-arm64.apk
-adb shell am start -n org.photocardlibre.app/.MainActivity
-```
-
-Validare manualmente Photo Picker, import di JPEG/PNG reali, miniature, rotazione/configuration change, anteprima multipagina, PDF, salvataggio MediaStore in `Download/PhotoCard Libre`, fallback SAF su API 24–28, apertura/condivisione e stampa del PDF al 100%.
-
-## Nota tecnica interna
-
-PhotoCard Libre deriva tecnicamente dalla precedente V0.1 FOTO ALBUM. Le build di sviluppo precedenti usavano l'identificatore storico `it.fotoalbum.spike`; l'identificatore definitivo è `org.photocardlibre.app`.
+PhotoCard Libre è un progetto libero e indipendente.

@@ -52,17 +52,22 @@ class SettingsNavigationTest {
         composeRule.onNodeWithText("APP INFO").assertIsDisplayed()
         composeRule.onNodeWithTag("photocard_libre_wordmark").assertIsDisplayed()
         composeRule.onNodeWithText("PhotoCard Libre").assertIsDisplayed()
-        composeRule.onNodeWithText("Free app for creating printable photo cards with captions.")
+        composeRule.onNodeWithText(
+            "PhotoCard Libre is a free and open-source app for creating printable photo cards directly from a smartphone.",
+        )
             .assertIsDisplayed()
-        composeRule.onNodeWithText("PhotoCard Libre is free and open-source software.")
-            .assertIsDisplayed()
+        composeRule.onNodeWithText("Free and open-source software").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Version").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText(BuildConfig.VERSION_NAME).assertIsDisplayed()
         composeRule.onNodeWithText("Privacy").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText(
-            "Photos are processed locally on the device and are not sent to external servers.",
+            "Images are processed locally. Photos and captions remain on the device and are not uploaded to external servers. The app does not require Internet access.",
         ).assertIsDisplayed()
-        composeRule.onAllNodesWithText("To be defined").assertCountEquals(5)
+        composeRule.onNodeWithText("Supported formats").assertIsDisplayed()
+        composeRule.onNodeWithText("JPEG and PNG").assertIsDisplayed()
+        composeRule.onNodeWithText("GNU GPL v3 or later").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("CC BY 4.0").performScrollTo().assertIsDisplayed()
+        composeRule.onAllNodesWithText("To be defined").assertCountEquals(2)
     }
 
     @Test
@@ -106,7 +111,10 @@ class SettingsNavigationTest {
     fun languageScreenShowsAllOptionsAndSystemBackReturnsToSettings() {
         openLanguage()
         composeRule.onNodeWithTag("schermata_lingua").assertIsDisplayed()
-        listOf("System", "Italiano", "English", "Español", "Deutsch", "Français", "Português")
+        listOf(
+            "System", "Italiano", "English", "Español", "Deutsch", "Français", "Português",
+            "العربية", "简体中文", "日本語", "हिन्दी", "Bahasa Indonesia",
+        )
             .forEach { label -> composeRule.onNodeWithText(label).performScrollTo().assertIsDisplayed() }
         composeRule.onNodeWithTag("language_en").assertIsSelected()
         pressSystemBack()

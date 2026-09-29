@@ -35,6 +35,11 @@ internal val AppLanguage.labelResource: Int
         AppLanguage.GERMAN -> R.string.language_german
         AppLanguage.FRENCH -> R.string.language_french
         AppLanguage.PORTUGUESE -> R.string.language_portuguese
+        AppLanguage.ARABIC -> R.string.language_arabic
+        AppLanguage.SIMPLIFIED_CHINESE -> R.string.language_simplified_chinese
+        AppLanguage.JAPANESE -> R.string.language_japanese
+        AppLanguage.HINDI -> R.string.language_hindi
+        AppLanguage.INDONESIAN -> R.string.language_indonesian
     }
 
 @Composable

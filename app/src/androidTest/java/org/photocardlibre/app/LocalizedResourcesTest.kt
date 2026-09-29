@@ -19,6 +19,11 @@ class LocalizedResourcesTest {
             "de" to "EINSTELLUNGEN",
             "fr" to "PARAMÈTRES",
             "pt" to "DEFINIÇÕES",
+            "ar" to "الإعدادات",
+            "zh-CN" to "设置",
+            "ja" to "設定",
+            "hi" to "सेटिंग",
+            "id" to "PENGATURAN",
         )
         titles.forEach { (code, expected) ->
             val localized = base.createConfigurationContext(
@@ -38,15 +43,36 @@ class LocalizedResourcesTest {
                 R.string.pdf_image_size_section,
                 R.string.pdf_caption_size_section,
                 R.string.app_description,
+                R.string.app_tagline,
+                R.string.app_use_aac,
+                R.string.app_gallery_description,
+                R.string.app_support_limit,
+                R.string.supported_formats,
                 R.string.open_source_description,
                 R.string.app_info_title,
                 R.string.privacy_label,
                 R.string.privacy_description,
                 R.string.credits_label,
+                R.string.credits_description,
                 R.string.value_to_be_defined,
             ).forEach { resource ->
                 assertTrue(localized.getString(resource).isNotBlank())
             }
         }
+    }
+
+    @Test
+    fun arabicResourcesUseRightToLeftLayoutDirection() {
+        val base = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val arabic = base.createConfigurationContext(
+            Configuration(base.resources.configuration).apply {
+                setLocales(LocaleList(Locale.forLanguageTag("ar")))
+                setLayoutDirection(Locale.forLanguageTag("ar"))
+            },
+        )
+        assertEquals(
+            android.util.LayoutDirection.RTL,
+            arabic.resources.configuration.layoutDirection,
+        )
     }
 }

@@ -29,6 +29,7 @@ class MainActivityTest {
         composeRule.onNodeWithText("PhotoCard Libre").assertIsDisplayed()
         composeRule.onNodeWithText("Your album starts here").assertIsDisplayed()
         composeRule.onNodeWithText("ADD PHOTOS").assertIsDisplayed()
+        composeRule.onNodeWithText("Supported formats: JPEG and PNG").assertIsDisplayed()
         composeRule.onNodeWithText("PREVIEW PDF").assertDoesNotExist()
         composeRule.onNodeWithText("CREATE PDF").assertDoesNotExist()
         composeRule.onNodeWithTag("album_vuoto").assertIsDisplayed()

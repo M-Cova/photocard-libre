@@ -2,14 +2,19 @@ package org.photocardlibre.app.settings
 
 import java.util.Locale
 
-enum class AppLanguage(val storageValue: String) {
-    SYSTEM("system"),
+enum class AppLanguage(val storageValue: String, val languageTag: String = storageValue) {
+    SYSTEM("system", "en"),
     ITALIAN("it"),
     ENGLISH("en"),
     SPANISH("es"),
     GERMAN("de"),
     FRENCH("fr"),
     PORTUGUESE("pt"),
+    ARABIC("ar"),
+    SIMPLIFIED_CHINESE("zh-Hans"),
+    JAPANESE("ja"),
+    HINDI("hi"),
+    INDONESIAN("id"),
     ;
 
     companion object {
@@ -18,15 +23,12 @@ enum class AppLanguage(val storageValue: String) {
         fun fromStorageValue(value: String?): AppLanguage =
             entries.firstOrNull { it.storageValue == value } ?: DEFAULT
 
-        fun resolvedLocale(language: AppLanguage, systemLocale: Locale): Locale = when (language) {
-            ITALIAN -> Locale.ITALIAN
-            ENGLISH -> Locale.ENGLISH
-            SPANISH -> Locale.forLanguageTag("es")
-            GERMAN -> Locale.GERMAN
-            FRENCH -> Locale.FRENCH
-            PORTUGUESE -> Locale.forLanguageTag("pt")
-            SYSTEM -> entries.firstOrNull { it != SYSTEM && it.storageValue == systemLocale.language }
-                ?.let { resolvedLocale(it, systemLocale) } ?: Locale.ENGLISH
+        fun resolvedLocale(language: AppLanguage, systemLocale: Locale): Locale {
+            if (language != SYSTEM) return Locale.forLanguageTag(language.languageTag)
+
+            return entries.firstOrNull {
+                it != SYSTEM && Locale.forLanguageTag(it.languageTag).language == systemLocale.language
+            }?.let { Locale.forLanguageTag(it.languageTag) } ?: Locale.ENGLISH
         }
     }
 }

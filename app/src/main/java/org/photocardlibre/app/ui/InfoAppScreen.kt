@@ -62,31 +62,61 @@ internal fun InfoAppScreen(
                 }
             }
             Text(
-                text = stringResource(R.string.open_source_description),
+                text = stringResource(R.string.app_use_aac),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+            )
+            Text(
+                text = stringResource(R.string.app_gallery_description),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+            )
+            Text(
+                text = stringResource(R.string.app_support_limit),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
             )
             AppPanel(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                 InfoItem(R.string.privacy_label, stringResource(R.string.privacy_description))
+                InfoDivider()
+                InfoItem(R.string.supported_formats_label, stringResource(R.string.supported_formats_value))
             }
+            InfoSectionTitle(R.string.open_source_description)
             AppPanel(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                 InfoItem(R.string.version_label, BuildConfig.VERSION_NAME)
                 InfoDivider()
-                InfoItem(R.string.software_license_label, stringResource(R.string.value_to_be_defined))
+                InfoItem(R.string.software_license_label, stringResource(R.string.software_license_value))
                 InfoDivider()
                 InfoItem(
                     R.string.graphic_resources_license_label,
-                    stringResource(R.string.value_to_be_defined),
+                    stringResource(R.string.graphic_resources_license_value),
                 )
                 InfoDivider()
+                InfoItem(R.string.ai_assistance_label, stringResource(R.string.ai_assistance_description))
+            }
+            InfoSectionTitle(R.string.project_label)
+            AppPanel(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                 InfoItem(R.string.source_repository_label, stringResource(R.string.value_to_be_defined))
                 InfoDivider()
                 InfoItem(R.string.report_issue_label, stringResource(R.string.value_to_be_defined))
-                InfoDivider()
-                InfoItem(R.string.credits_label, stringResource(R.string.value_to_be_defined))
             }
+            InfoSectionTitle(R.string.credits_label)
+            Text(
+                text = stringResource(R.string.credits_description),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+            )
         }
     }
+}
+
+@Composable
+private fun InfoSectionTitle(@StringRes title: Int) {
+    Text(
+        text = stringResource(title),
+        style = MaterialTheme.typography.titleLarge,
+        modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+    )
 }
 
 @Composable
