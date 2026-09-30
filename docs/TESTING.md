@@ -1,4 +1,4 @@
-# Beta 5 — checklist di test
+# Beta 6 — checklist di test
 
 ## Test automatici
 
@@ -12,6 +12,22 @@ Con JDK 17 e Android SDK 35 configurati:
 ./gradlew assembleRelease
 git diff --check
 ```
+
+I cinque pacchetti Python della release sono dipendenze dirette e hanno versioni
+fissate nel blocco Chaquopy di `app/build.gradle.kts`. Non modificare manualmente
+queste versioni o i timestamp durante la preparazione di una release.
+
+La release riproducibile deve essere costruita dalla radice del repository con:
+
+```bash
+./scripts/build-reproducible-release.sh
+```
+
+Lo script imposta `SOURCE_DATE_EPOCH` al timestamp Unix del commit `HEAD`, ottenuto
+con `git log -1 --format=%ct`, quindi esegue una build release pulita usando la
+configurazione di signing già prevista dal progetto. Nessuna password o chiave è
+contenuta nello script. Il checkout deve essere pulito: lo script interrompe la
+build se rileva modifiche o file non tracciati.
 
 Se l’emulatore `PhotoCardTest35` o un device compatibile è disponibile:
 

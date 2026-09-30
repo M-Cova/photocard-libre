@@ -41,8 +41,8 @@ android {
         applicationId = "org.photocardlibre.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 4
-        versionName = "0.1-beta.5"
+        versionCode = 5
+        versionName = "0.1-beta.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -97,6 +97,9 @@ chaquopy {
         pip {
             install("Pillow==11.0.0")
             install("reportlab==5.0.1")
+            install("charset-normalizer==3.5.1")
+            install("chaquopy-freetype==2.9.1")
+            install("chaquopy-libjpeg==1.5.3")
         }
     }
 }
