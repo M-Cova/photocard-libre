@@ -1,0 +1,37 @@
+Categories:
+  - Graphics
+License: GPL-3.0-or-later
+SourceCode: https://github.com/M-Cova/photocard-libre
+IssueTracker: https://github.com/M-Cova/photocard-libre/issues
+
+Name: PhotoCard Libre
+Summary: Create printable photo cards and A4 PDFs offline
+Description: |-
+  Create printable photo cards directly on an Android device. Select and crop
+  photos, add short captions, reorder the cards, preview the result, and export
+  an A4 PDF for saving or sharing.
+
+  The app works locally, without accounts, advertising, tracking, analytics, or
+  Internet access. It can also support Augmentative and Alternative
+  Communication workflows, but is not a replacement for dedicated AAC tools.
+
+RepoType: git
+Repo: https://github.com/M-Cova/photocard-libre.git
+
+Builds:
+  - versionName: 0.1-beta.4
+    versionCode: 3
+    commit: v0.1-beta.4
+    patch:
+      - org-json-dependency-substitution.patch
+      - deterministic-python-wheels.patch
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/PhotoCard-Libre-release-unsigned.apk
+    prebuild: "mkdir -p fdroid/wheels\ncp ../../fdroid/requirements.txt fdroid/requirements.txt\n\
+      ../../fdroid/fetch-wheels.sh fdroid/wheels"
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: 0.1-beta.4
+CurrentVersionCode: 3

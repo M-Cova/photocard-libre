@@ -1,0 +1,18 @@
+diff --git a/build.gradle.kts b/build.gradle.kts
+index fd99127..f7c79e5 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -1,3 +1,13 @@
++buildscript {
++    configurations.classpath {
++        resolutionStrategy.dependencySubstitution {
++            substitute(module("org.json:json:20160810"))
++                .using(module("org.json:json:20231013"))
++                .because("Use the maintained FLOSS org.json release for the F-Droid build classpath")
++        }
++    }
++}
++
+ plugins {
+     id("com.android.application") version "8.8.2" apply false
+     id("org.jetbrains.kotlin.android") version "2.1.0" apply false

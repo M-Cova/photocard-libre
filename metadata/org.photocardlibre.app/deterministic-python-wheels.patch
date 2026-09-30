@@ -1,0 +1,19 @@
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+index 754d1ae..c904223 100644
+--- a/app/build.gradle.kts
++++ b/app/build.gradle.kts
+@@ -95,8 +95,12 @@ chaquopy {
+         version = "3.12"
+         buildPython("python3.12")
+         pip {
+-            install("Pillow==11.0.0")
+-            install("reportlab==5.0.1")
++            options(
++                "--no-index",
++                "--find-links", rootProject.file("fdroid/wheels").absolutePath,
++                "--require-hashes",
++            )
++            install("-r", rootProject.file("fdroid/requirements.txt").absolutePath)
+         }
+     }
+ }
