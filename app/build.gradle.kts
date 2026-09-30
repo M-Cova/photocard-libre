@@ -41,8 +41,8 @@ android {
         applicationId = "org.photocardlibre.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 3
-        versionName = "0.1-beta.4"
+        versionCode = 4
+        versionName = "0.1-beta.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {

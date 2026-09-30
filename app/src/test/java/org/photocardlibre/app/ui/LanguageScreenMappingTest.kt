@@ -7,25 +7,24 @@ import org.photocardlibre.app.settings.AppLanguage
 
 class LanguageScreenMappingTest {
     @Test
-    fun everyLanguageMapsToItsNativeNameResource() {
-        val expected = mapOf(
-            AppLanguage.SYSTEM to R.string.language_system,
-            AppLanguage.ITALIAN to R.string.language_italian,
-            AppLanguage.ENGLISH to R.string.language_english,
-            AppLanguage.SPANISH to R.string.language_spanish,
-            AppLanguage.GERMAN to R.string.language_german,
-            AppLanguage.FRENCH to R.string.language_french,
-            AppLanguage.PORTUGUESE to R.string.language_portuguese,
-            AppLanguage.ARABIC to R.string.language_arabic,
-            AppLanguage.SIMPLIFIED_CHINESE to R.string.language_simplified_chinese,
-            AppLanguage.JAPANESE to R.string.language_japanese,
-            AppLanguage.HINDI to R.string.language_hindi,
-            AppLanguage.INDONESIAN to R.string.language_indonesian,
-        )
+    fun selectorContainsSystemFollowedByEveryExplicitLanguage() {
+        assertEquals(AppLanguage.SYSTEM, AppLanguage.entries.first())
+        assertEquals(11, AppLanguage.entries.count { it.nativeName != null })
 
-        assertEquals(AppLanguage.entries.toSet(), expected.keys)
-        expected.forEach { (language, resource) ->
-            assertEquals(resource, language.labelResource)
-        }
+        val expectedResources = listOf(
+            R.string.language_system,
+            R.string.language_italian,
+            R.string.language_english,
+            R.string.language_spanish,
+            R.string.language_german,
+            R.string.language_french,
+            R.string.language_portuguese,
+            R.string.language_arabic,
+            R.string.language_simplified_chinese,
+            R.string.language_japanese,
+            R.string.language_hindi,
+            R.string.language_indonesian,
+        )
+        assertEquals(expectedResources, AppLanguage.entries.map { it.labelResource })
     }
 }

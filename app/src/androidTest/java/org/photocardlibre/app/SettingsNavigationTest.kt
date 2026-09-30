@@ -1,5 +1,6 @@
 package org.photocardlibre.app
 
+import android.content.res.Resources
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertCountEquals
@@ -111,14 +112,35 @@ class SettingsNavigationTest {
     fun languageScreenShowsAllOptionsAndSystemBackReturnsToSettings() {
         openLanguage()
         composeRule.onNodeWithTag("schermata_lingua").assertIsDisplayed()
+        composeRule.onNodeWithTag("language_section_icon").assertIsDisplayed()
+        composeRule.onNodeWithTag("system_language_icon", useUnmergedTree = true).assertIsDisplayed()
+        val systemLanguage = AppLanguage.systemLanguageNativeName(
+            Resources.getSystem().configuration.locales[0],
+        )
         listOf(
-            "System", "Italiano", "English", "Español", "Deutsch", "Français", "Português",
+            "System · $systemLanguage", "Italiano", "English", "Español", "Deutsch", "Français", "Português",
             "العربية", "简体中文", "日本語", "हिन्दी", "Bahasa Indonesia",
         )
             .forEach { label -> composeRule.onNodeWithText(label).performScrollTo().assertIsDisplayed() }
         composeRule.onNodeWithTag("language_en").assertIsSelected()
         pressSystemBack()
         composeRule.onNodeWithTag("schermata_impostazioni").assertIsDisplayed()
+    }
+
+    @Test
+    fun systemLanguageSelectionIsAppliedAndPersists() {
+        openLanguage()
+        composeRule.onNodeWithTag("language_system").performClick()
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            runBlocking {
+                SettingsRepository(composeRule.activity).appLanguage.first() == AppLanguage.SYSTEM
+            }
+        }
+        composeRule.onNodeWithTag("language_system").assertIsSelected()
+
+        composeRule.activityRule.scenario.recreate()
+        composeRule.onNodeWithTag("language_system").assertIsSelected()
+        composeRule.onNodeWithTag("system_language_icon", useUnmergedTree = true).assertIsDisplayed()
     }
 
     @Test
