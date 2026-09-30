@@ -1,4 +1,4 @@
-# Beta 4 — checklist di test
+# Beta 5 — checklist di test
 
 ## Test automatici
 
@@ -31,3 +31,5 @@ Se l’emulatore `PhotoCardTest35` o un device compatibile è disponibile:
 - anteprima A4, creazione, nome, salvataggio, apertura e condivisione del PDF.
 
 La sola esecuzione di `assembleDebugAndroidTest` compila l’APK dei test ma non esegue test su device o emulatore.
+
+Additional translations are included and have been tested for basic UI functionality, but some languages have not been reviewed by native speakers.

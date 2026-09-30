@@ -32,6 +32,25 @@ class AppLanguageTest {
     }
 
     @Test
+    fun explicitLanguagesExposeStableNativeNamesInSelectorOrder() {
+        assertEquals(
+            listOf(
+                "Italiano", "English", "Español", "Deutsch", "Français", "Português",
+                "العربية", "简体中文", "日本語", "हिन्दी", "Bahasa Indonesia",
+            ),
+            AppLanguage.entries.filterNot { it == AppLanguage.SYSTEM }.map { it.nativeName },
+        )
+    }
+
+    @Test
+    fun systemLanguageNameUsesRecognizedEndonymAndDeviceFallback() {
+        assertEquals("Italiano", AppLanguage.systemLanguageNativeName(Locale.ITALIAN))
+        assertEquals("简体中文", AppLanguage.systemLanguageNativeName(Locale.SIMPLIFIED_CHINESE))
+        val russian = Locale.forLanguageTag("ru-RU")
+        assertEquals(russian.getDisplayLanguage(russian), AppLanguage.systemLanguageNativeName(russian))
+    }
+
+    @Test
     fun systemUsesPrimarySupportedLanguageAndFallsBackToEnglish() {
         listOf("it", "en", "es", "de", "fr", "pt", "ar", "zh", "ja", "hi", "id").forEach { code ->
             assertEquals(code, AppLanguage.resolvedLocale(AppLanguage.SYSTEM, Locale.forLanguageTag("$code-XX")).language)

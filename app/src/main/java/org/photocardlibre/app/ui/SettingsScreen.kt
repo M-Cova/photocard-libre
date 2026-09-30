@@ -1,6 +1,8 @@
 package org.photocardlibre.app.ui
 
+import android.content.res.Resources
 import androidx.activity.compose.BackHandler
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.BorderStroke
@@ -63,6 +65,7 @@ internal fun SettingsScreen(
 ) {
     BackHandler(onBack = onBack)
     val displayLocale = LocalConfiguration.current.locales[0]
+    val systemLocale = Resources.getSystem().configuration.locales[0]
 
     Scaffold(
         modifier = modifier.fillMaxSize().testTag("schermata_impostazioni"),
@@ -86,8 +89,15 @@ internal fun SettingsScreen(
                     headlineContent = { Text(stringResource(R.string.language_section)) },
                     supportingContent = {
                         Text(
-                            stringResource(selectedLanguage.labelResource),
+                            selectedLanguage.displayLabel(systemLocale),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_language),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     },
                     trailingContent = {
@@ -189,9 +199,23 @@ internal fun SettingsScreen(
 internal fun SettingsTopBar(
     title: String,
     onBack: () -> Unit,
+    @DrawableRes titleIcon: Int? = null,
 ) {
     TopAppBar(
-        title = { Text(title) },
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                titleIcon?.let {
+                    Icon(
+                        painter = painterResource(it),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .testTag("language_section_icon"),
+                    )
+                }
+                Text(title)
+            }
+        },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface,
             titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,

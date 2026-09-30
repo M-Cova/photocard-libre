@@ -1,0 +1,11 @@
+PhotoCard Libre is a free and open-source Android app for creating printable photo cards directly on a smartphone.
+
+It can also be useful in Augmentative and Alternative Communication (AAC) contexts, for creating cards with photographs and short captions of up to 4 words related to people, objects, places and everyday activities.
+
+Images can be selected directly from the device gallery, without transferring them to another device.
+
+PhotoCard Libre is a support tool and does not replace complete AAC software or dedicated professional tools.
+
+Images are processed locally. Photos and captions remain on the device and are not uploaded to external servers. The app does not require Internet access.
+
+Supported formats: JPEG and PNG.
