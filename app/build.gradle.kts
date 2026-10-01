@@ -37,12 +37,17 @@ android {
     namespace = "org.photocardlibre.app"
     compileSdk = 35
 
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+
     defaultConfig {
         applicationId = "org.photocardlibre.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 5
-        versionName = "0.1-beta.6"
+        versionCode = 6
+        versionName = "0.1-beta.7"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
