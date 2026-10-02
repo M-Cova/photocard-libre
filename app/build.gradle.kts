@@ -46,8 +46,8 @@ android {
         applicationId = "org.photocardlibre.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 6
-        versionName = "0.1-beta.7"
+        versionCode = 7
+        versionName = "0.1-beta.8"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -95,16 +95,60 @@ android {
     }
 }
 
+val fdroidOfflineWheelsProperty = providers.gradleProperty("photocardFdroidOfflineWheels").orNull
+check(fdroidOfflineWheelsProperty == null || fdroidOfflineWheelsProperty in listOf("true", "false")) {
+    "photocardFdroidOfflineWheels must be either true or false"
+}
+val useFdroidOfflineWheels = fdroidOfflineWheelsProperty == "true"
+val fdroidRequirementsFile = rootProject.file("fdroid/requirements.txt")
+val fdroidWheelHashesFile = rootProject.file("fdroid/wheel-hashes.sha256")
+val fdroidWheelsDirectory = rootProject.file("fdroid/wheels")
+
+if (useFdroidOfflineWheels) {
+    check(fdroidRequirementsFile.isFile) {
+        "F-Droid offline wheel mode requires ${fdroidRequirementsFile.absolutePath}"
+    }
+    check(fdroidWheelHashesFile.isFile) {
+        "F-Droid offline wheel mode requires ${fdroidWheelHashesFile.absolutePath}"
+    }
+    check(fdroidWheelsDirectory.isDirectory) {
+        "F-Droid offline wheel mode requires ${fdroidWheelsDirectory.absolutePath}. " +
+            "Run fdroid/fetch-wheels.sh fdroid/wheels first."
+    }
+
+    val expectedWheelNames = fdroidWheelHashesFile.readLines()
+        .map(String::trim)
+        .filter(String::isNotEmpty)
+        .map { line -> line.substringAfter("  ", missingDelimiterValue = "") }
+    check(expectedWheelNames.isNotEmpty() && expectedWheelNames.none(String::isEmpty)) {
+        "Invalid F-Droid wheel hash manifest: ${fdroidWheelHashesFile.absolutePath}"
+    }
+    val missingWheelNames = expectedWheelNames.filterNot { fdroidWheelsDirectory.resolve(it).isFile }
+    check(missingWheelNames.isEmpty()) {
+        "F-Droid offline wheel mode is missing: ${missingWheelNames.joinToString()}. " +
+            "Run fdroid/fetch-wheels.sh fdroid/wheels first."
+    }
+}
+
 chaquopy {
     defaultConfig {
-        version = "3.12"
-        buildPython("python3.12")
+        version = "3.13"
+        buildPython("python3.13")
         pip {
-            install("Pillow==11.0.0")
-            install("reportlab==5.0.1")
-            install("charset-normalizer==3.5.1")
-            install("chaquopy-freetype==2.9.1")
-            install("chaquopy-libjpeg==1.5.3")
+            if (useFdroidOfflineWheels) {
+                options(
+                    "--no-index",
+                    "--find-links", fdroidWheelsDirectory.absolutePath,
+                    "--require-hashes",
+                )
+                install("-r", fdroidRequirementsFile.absolutePath)
+            } else {
+                install("Pillow==11.0.0")
+                install("reportlab==5.0.1")
+                install("charset-normalizer==3.5.1")
+                install("chaquopy-freetype==2.9.1")
+                install("chaquopy-libjpeg==1.5.3")
+            }
         }
     }
 }

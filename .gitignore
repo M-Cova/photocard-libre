@@ -14,4 +14,4 @@ keystore.properties
 __pycache__/
 *.pyc
 build-host/
-
+fdroid/wheels/
